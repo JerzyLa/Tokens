@@ -61,31 +61,82 @@ contract ERC20Interface {
 //         Payable functions will be disabled.
 //      5. What is set goal ? Withdrawl when goal not reached, withdrawl when goal is reached ?
 // ----------------------------------------------------------------------------
-contract Crowdsale is Owned
-{
-    ERC20Interface public tokenAddress;
-    uint public price;
-    uint public collectedAmount = 0;
-    bool isCrowdsaleOpen = false;
+contract Crowdsale is Owned {
 
-    event FundTransfer(address follower, uint amount, uint tokens);
-
-    function Crowdsale(
-        address ercTokenAddress, 
-        uint etherCostOfEachToken) public
-    {
-        tokenAddress = ERC20Interface(ercTokenAddress);
-        price = etherCostOfEachToken * 1 ether;
-        isCrowdsaleOpen = true; // temporary
+    struct Phase {
+        uint priceInCent;
+        uint startTime;
+        uint duration;
+        uint deadline;
     }
 
-    function () payable public
+    enum State { Active, Suspend, Refunding, Closed }
+
+    ERC20Interface public tokenAddress;
+    uint public collectedAmountInEther;
+    State public state;
+    Phase[4] phases;
+    uint8 currentPhase;
+
+    event TokenPurchased(address follower, uint amount, uint tokens);
+
+    function Crowdsale (
+        address ercTokenAddress, 
+        uint price1,
+        uint startTime1,
+        uint duration1,
+        uint price2,
+        uint startTime2,
+        uint duration2,
+        uint price3,
+        uint startTime3,
+        uint duration3,
+        uint price4,
+        uint startTime4,
+        uint duration4
+        ) public
     {
-        require(isCrowdsaleOpen);
+        tokenAddress = ERC20Interface(ercTokenAddress);
+        collectedAmountInEther = 0;
+        state = State.Suspend;
+        phases[0] = Phase(price1, startTime1, duration1, startTime1 + duration1);
+        phases[1] = Phase(price2, startTime2, duration2, startTime2 + duration2);
+        phases[2] = Phase(price3, startTime3, duration3, startTime3 + duration3);
+        phases[3] = Phase(price4, startTime4, duration4, startTime4 + duration4);
+    }
+
+    function () payable public {
+        updateState();
+        require(state == State.Active);
         uint amountInEther = msg.value; 
-        collectedAmount += amountInEther;
-        uint tokens = amountInEther / price; // TODO: add safe math
+        collectedAmountInEther += amountInEther;
+        uint tokens = amountInEther / phases[currentPhase].priceInCent; // TODO: add safe math and price calculation
         tokenAddress.transfer(msg.sender, tokens);
-        FundTransfer(msg.sender, amountInEther, tokens);
+        TokenPurchased(msg.sender, amountInEther, tokens);
+    } 
+
+    function updateState() private {
+        if (state == State.Active || state == State.Suspend) {
+            int8 phase = checkPhase();
+            if (phase < 0) {
+                state = State.Suspend;
+            } else {
+                state = State.Active;
+                currentPhase = uint8(phase);
+            }
+        }
+    } 
+
+    function checkPhase() public constant returns(int8) {
+        if (now < phases[0].startTime || now > phases[3].deadline)
+            return -1;
+
+        for (uint8 i = 0; i < phases.length; ++i) {
+            if (now <= phases[i].deadline && now >= phases[i].startTime) {
+                return int8(i);
+            }
+        }
+        
+        return -1;
     } 
 }
