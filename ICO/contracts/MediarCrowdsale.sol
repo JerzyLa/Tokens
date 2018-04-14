@@ -50,7 +50,7 @@ contract MediarCrowdsale is Ownable {
 
    /**
     * Event for token purchase logging
-    * @param purchaser who bought tokens
+    * @param buyer who bought tokens
     * @param value weis paid for purchase
     * @param amountOfTokens amount of tokens purchased
    */
@@ -70,20 +70,20 @@ contract MediarCrowdsale is Ownable {
         uint256 _rate4, uint256 _startTime4, uint256 _duration4
         ) public
     {
-        require(_price1 > 0);
-        require(_price2 > 0);
-        require(_price3 > 0);
-        require(_price4 > 0);
+        require(_rate1 > 0);
+        require(_rate2 > 0);
+        require(_rate3 > 0);
+        require(_rate4 > 0);
         require(_wallet != address(0));
         require(_token != address(0));
 
         wallet = _wallet;
         token = _token;
         state = State.Suspend;
-        phases[0] = Phase(rate1, startTime1, duration1 * 1 minutes, startTime1 + duration1 * 1 minutes);
-        phases[1] = Phase(rate2, startTime2, duration2 * 1 minutes, startTime2 + duration2 * 1 minutes);
-        phases[2] = Phase(rate3, startTime3, duration3 * 1 minutes, startTime3 + duration3 * 1 minutes);
-        phases[3] = Phase(rate4, startTime4, duration4 * 1 minutes, startTime4 + duration4 * 1 minutes);
+        phases[0] = Phase(_rate1, _startTime1, _duration1 * 1 minutes, _startTime1 + _duration1 * 1 minutes);
+        phases[1] = Phase(_rate2, _startTime2, _duration2 * 1 minutes, _startTime2 + _duration2 * 1 minutes);
+        phases[2] = Phase(_rate3, _startTime3, _duration3 * 1 minutes, _startTime3 + _duration3 * 1 minutes);
+        phases[3] = Phase(_rate4, _startTime4, _duration4 * 1 minutes, _startTime4 + _duration4 * 1 minutes);
     }
 
     
@@ -107,11 +107,11 @@ contract MediarCrowdsale is Ownable {
         forwardFunds(); // Czy to ma być, czy tylko na końcu transfer ?
     }
 
-    function withdrawal() public view onlyowner crowdsaleClosed {
+    function withdrawal() public view onlyOwner crowdsaleClosed {
 
     }
 
-    function refunding() public view onlyowner crowdsaleClosed {
+    function refunding() public view onlyOwner crowdsaleClosed {
 
     }
 
