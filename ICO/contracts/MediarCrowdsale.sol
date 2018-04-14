@@ -1,49 +1,8 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
-// ----------------------------------------------------------------------------
-// Owned contract
-// ----------------------------------------------------------------------------
-contract Owned {
-    address public owner;
-    address public newOwner;
-
-    event OwnershipTransferred(address indexed _from, address indexed _to);
-
-    function Owned() public {
-        owner = msg.sender;
-    }
-
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
-
-    function transferOwnership(address _newOwner) public onlyOwner {
-        newOwner = _newOwner;
-    }
-    function acceptOwnership() public {
-        require(msg.sender == newOwner);
-        OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-        newOwner = address(0);
-    }
-}
-
-// ----------------------------------------------------------------------------
-// ERC Token Standard #20 Interface
-// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
-// ----------------------------------------------------------------------------
-contract ERC20Interface {
-    function totalSupply() public constant returns (uint);
-    function balanceOf(address tokenOwner) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
-    function transfer(address to, uint tokens) public returns (bool success);
-    function approve(address spender, uint tokens) public returns (bool success);
-    function transferFrom(address from, address to, uint tokens) public returns (bool success);
-
-    event Transfer(address indexed from, address indexed to, uint tokens);
-    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
-}
+import 'zeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 // ----------------------------------------------------------------------------
 // Crowdsale contract is used for selling ERC20 tokens for setup price.
@@ -61,18 +20,19 @@ contract ERC20Interface {
 //         Payable functions will be disabled.
 //      5. What is set goal ? Withdrawl when goal not reached, withdrawl when goal is reached ?
 // ----------------------------------------------------------------------------
-contract Crowdsale is Owned {
+contract MediarCrowdsale is Ownable {
+    using SafeMath for uint256;
 
     struct Phase {
-        uint priceInCent;
+        uint priceInEther;
         uint startTime;
-        uint duration;
+        uint durationInMinutes;
         uint deadline;
     }
 
-    enum State { Active, Suspend, Refunding, Closed }
+    enum State { Active, Suspend, Closed }
 
-    ERC20Interface public tokenAddress;
+    ERC20 public tokenAddress;
     uint public collectedAmountInEther;
     State public state;
     Phase[4] phases;
@@ -99,10 +59,10 @@ contract Crowdsale is Owned {
         tokenAddress = ERC20Interface(ercTokenAddress);
         collectedAmountInEther = 0;
         state = State.Suspend;
-        phases[0] = Phase(price1, startTime1, duration1, startTime1 + duration1);
-        phases[1] = Phase(price2, startTime2, duration2, startTime2 + duration2);
-        phases[2] = Phase(price3, startTime3, duration3, startTime3 + duration3);
-        phases[3] = Phase(price4, startTime4, duration4, startTime4 + duration4);
+        phases[0] = Phase(price1, startTime1, duration1 * 1 minutes, startTime1 + duration1 * 1 minutes);
+        phases[1] = Phase(price2, startTime2, duration2 * 1 minutes, startTime2 + duration2 * 1 minutes);
+        phases[2] = Phase(price3, startTime3, duration3 * 1 minutes, startTime3 + duration3 * 1 minutes);
+        phases[3] = Phase(price4, startTime4, duration4 * 1 minutes, startTime4 + duration4 * 1 minutes);
     }
 
     function () payable public {
@@ -110,9 +70,9 @@ contract Crowdsale is Owned {
         require(state == State.Active);
         uint amountInEther = msg.value; 
         collectedAmountInEther += amountInEther;
-        uint tokens = amountInEther / phases[currentPhase].priceInCent; // TODO: add safe math and price calculation
+        uint tokens = amountInEther / phases[currentPhase].priceInEther; // TODO: add safe math and price calculation
         tokenAddress.transfer(msg.sender, tokens);
-        TokenPurchased(msg.sender, amountInEther, tokens);
+        emit TokenPurchased(msg.sender, amountInEther, tokens);
     } 
 
     function updateState() private {
