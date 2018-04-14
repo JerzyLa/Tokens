@@ -24,7 +24,7 @@ module.exports = {
       { test: /\.json$/, use: 'json-loader' },
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
+        exclude: /(bower_components)/,
         loader: 'babel-loader',
         query: {
           presets: ['es2015'],
