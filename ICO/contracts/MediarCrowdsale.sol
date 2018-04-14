@@ -27,12 +27,12 @@ contract MediarCrowdsale is Ownable {
     struct Phase {
         // How meny token units a buyer gets per wei
         uint256 rate;
-        uint256 startTime;
-        uint256 durationInMinutes;
-        uint256 deadline;
+        uint256 openingTime;
+        uint256 closingTime;
     }
 
-    enum State { Active, Suspend, Closed }
+    /// TODO: states can be moved to parent or child contract
+    enum State { Active, Refunding, Closed }
 
     // The token being sold
     ERC20 public token;  // TODO: change token to ERC223 or different
@@ -45,8 +45,7 @@ contract MediarCrowdsale is Ownable {
 
     // Crowdsale states 
     State state;
-    uint8 currentPhase;
-    Phase[4] phases;
+    Phase[3] phases;
 
    /**
     * Event for token purchase logging
@@ -61,50 +60,61 @@ contract MediarCrowdsale is Ownable {
         _;
     }
 
-    function Crowdsale (
+    modifier onlyWhileOpen() {
+        require(state == State.Active);
+        require(checkPhase() >= 0);
+        _;
+    }
+
+    function MediarCrowdsale (
         address _wallet,
         ERC20 _token, 
-        uint256 _rate1, uint256 _startTime1, uint256 _duration1,
-        uint256 _rate2, uint256 _startTime2, uint256 _duration2,
-        uint256 _rate3, uint256 _startTime3, uint256 _duration3,
-        uint256 _rate4, uint256 _startTime4, uint256 _duration4
+        uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
+        uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
+        uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3
         ) public
     {
-        require(_rate1 > 0);
-        require(_rate2 > 0);
-        require(_rate3 > 0);
-        require(_rate4 > 0);
         require(_wallet != address(0));
         require(_token != address(0));
+        require(_rate1 > 0);
+        require(_openingTime1 >= block.timestamp);
+        require(_closingTime1 >= _openingTime1);
+        require(_rate2 > 0);
+        require(_openingTime2 >= _closingTime1);
+        require(_closingTime2 >= _openingTime2);
+        require(_rate3 > 0);
+        require(_openingTime3 >= _closingTime2);
+        require(_closingTime3 >= _openingTime3);
 
         wallet = _wallet;
         token = _token;
-        state = State.Suspend;
-        phases[0] = Phase(_rate1, _startTime1, _duration1 * 1 minutes, _startTime1 + _duration1 * 1 minutes);
-        phases[1] = Phase(_rate2, _startTime2, _duration2 * 1 minutes, _startTime2 + _duration2 * 1 minutes);
-        phases[2] = Phase(_rate3, _startTime3, _duration3 * 1 minutes, _startTime3 + _duration3 * 1 minutes);
-        phases[3] = Phase(_rate4, _startTime4, _duration4 * 1 minutes, _startTime4 + _duration4 * 1 minutes);
+        state = State.Active;
+        phases[0] = Phase(_rate1, _openingTime1, _closingTime1);
+        phases[1] = Phase(_rate2, _openingTime2, _closingTime2);
+        phases[2] = Phase(_rate3, _openingTime3, _closingTime3);
     }
 
-    
     // -----------------------------------------
     // Crowdsale external interface
     // -----------------------------------------
 
     // TODO: add crowdsale closed status
     // TODO: change phase 2
-    function () external payable {
-        updateState();
-        require(state == State.Active);
+    function () external payable onlyWhileOpen {
         require(msg.value != 0);
         
         uint256 amountInWei = msg.value;
-        uint256 tokens = amountInWei.mul(phases[currentPhase].rate); 
+        uint256 tokens = amountInWei.mul(phases[uint8(checkPhase())].rate); 
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
         token.transfer(msg.sender, tokens);
         emit TokenPurchased(msg.sender, amountInWei, tokens);
         forwardFunds(); // Czy to ma być, czy tylko na końcu transfer ?
+    }
+
+    // TODO: Contract can be also closed manually
+    function hasClosed() public view returns (bool) {
+        return block.timestamp > phases[phases.length-1].closingTime;
     }
 
     function withdrawal() public view onlyOwner crowdsaleClosed {
@@ -118,25 +128,10 @@ contract MediarCrowdsale is Ownable {
     // -----------------------------------------
     // Internal interface (extensible) - similar to protected
     // -----------------------------------------
-    
-    function updateState() internal {
-        if (state == State.Active || state == State.Suspend) {
-            int8 phase = checkPhase();
-            if (phase < 0) {
-                state = State.Suspend;
-            } else {
-                state = State.Active;
-                currentPhase = uint8(phase);
-            }
-        }
-    } 
 
-    function checkPhase() internal constant returns(int8) {
-        if (now < phases[0].startTime || now > phases[3].deadline)
-            return -1;
-
+    function checkPhase() internal view returns(int8) {
         for (uint8 i = 0; i < phases.length; ++i) {
-            if (now <= phases[i].deadline && now >= phases[i].startTime) {
+            if (block.timestamp <= phases[i].closingTime && block.timestamp >= phases[i].openingTime) {
                 return int8(i);
             }
         }
