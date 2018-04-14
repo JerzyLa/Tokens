@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 import 'zeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
@@ -56,7 +56,7 @@ contract MediarCrowdsale is Ownable {
         uint duration4
         ) public
     {
-        tokenAddress = ERC20Interface(ercTokenAddress);
+        tokenAddress = ERC20(ercTokenAddress);
         collectedAmountInEther = 0;
         state = State.Suspend;
         phases[0] = Phase(price1, startTime1, duration1 * 1 minutes, startTime1 + duration1 * 1 minutes);

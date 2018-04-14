@@ -36,6 +36,6 @@
   },
   "dependencies": {
     "solc": "^0.4.20",
-    "zeppelin-solidity": "^1.8.0"
+    "zeppelin-solidity": "git://github.com/OpenZeppelin/zeppelin-solidity.git#master"
   }
 }
