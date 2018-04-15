@@ -129,6 +129,6 @@ contract TimedStagesCrowdsale {
         token.transfer(beneficiary, tokens);
     }
 
-    function _postponedTokenPurchase(address beneficiary, uint amount) internal {
+    function _postponedTokenPurchase(address /*beneficiary*/, uint /*amount*/) internal {
     }
 }
