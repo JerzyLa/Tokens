@@ -1,11 +1,11 @@
-var FixedSupplyToken = artifacts.require("./FixedSupplyToken.sol");
-var Crowdsale = artifacts.require("./Crowdsale.sol");
+var MediarToken = artifacts.require("./MediarToken.sol");
+var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(FixedSupplyToken).then(instance => {
-    deployer.link(FixedSupplyToken, Crowdsale);
+  deployer.deploy(MediarToken).then(instance => {
+    deployer.link(MediarToken, MediarCrowdsale);
     deployer.deploy(
-      Crowdsale,
+      MediarCrowdsale,
       instance.address,
       0.00125,      // price in ether
       1525132800,   // start time timestamp
