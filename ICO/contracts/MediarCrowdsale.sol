@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "./OwnerRefundableCrowdsale.sol";
+import "./PostDeliveryAndRefundableCrowdsale.sol";
 
 // ----------------------------------------------------------------------------
 // @title MediarCrowdsale
@@ -18,7 +18,7 @@ import "./OwnerRefundableCrowdsale.sol";
 //         Payable functions will be disabled.
 //      5. Refunding when goal not reached, withdrawl when goal is reached.
 // ----------------------------------------------------------------------------
-contract MediarCrowdsale is OwnerRefundableCrowdsale {
+contract MediarCrowdsale is PostDeliveryAndRefundableCrowdsale {
     using SafeMath for uint256;
 
     function MediarCrowdsale (

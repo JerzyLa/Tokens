@@ -5,11 +5,11 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./TimedStagesCrowdsale.sol";
 
 /**
- * @title FinalizableWithResultCrowdsale
+ * @title FinalizableCrowdsale
  * @dev Extension of Crowdsale where an owner can do extra work
  * after finishing.
  */
-contract FinalizableWithResultCrowdsale is TimedStagesCrowdsale, Ownable {
+contract FinalizableCrowdsale is TimedStagesCrowdsale, Ownable {
     using SafeMath for uint256;
 
     bool public isFinalized = false;
