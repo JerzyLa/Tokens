@@ -34,12 +34,13 @@ contract TimedStagesCrowdsale {
 
    /**
     * Event for token purchase logging
-    * @param buyer who bought tokens
+    * @param purchaser who bought tokens
+    * @param beneficiary who received tokens
     * @param value weis paid for purchase
     * @param amountOfTokens amount of tokens purchased
    */
-    event TokenPurchased(address buyer, uint256 value, uint256 amountOfTokens);
-    event PostponedTokenPurchased(address buyer, uint256 value);
+    event TokenPurchased(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amountOfTokens);
+    event PostponedTokenPurchased(address indexed purchaser, address indexed beneficiary, uint256 value);
 
     modifier onlyWhileOpen() {
         require(checkStage() >= 0);
@@ -82,20 +83,24 @@ contract TimedStagesCrowdsale {
     // Crowdsale external interface
     // -----------------------------------------
 
-    function () external payable onlyWhileOpen {
-        require(msg.value != 0);
+    function () external payable {
+        buyTokens(msg.sender);
+    }
+
+    function buyTokens(address _beneficiary) public payable onlyWhileOpen {
+        require(_beneficiary != 0);
         
         uint256 amountInWei = msg.value;
         uint8 stageNumber = uint8(checkStage());
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
         if (stages[stageNumber].stageType == StageType.Final) {
-            _postponedTokenPurchase(msg.sender, amountInWei);
-            emit PostponedTokenPurchased(msg.sender, amountInWei);
+            _postponedTokenPurchase(_beneficiary, amountInWei);
+            emit PostponedTokenPurchased(msg.sender, _beneficiary, amountInWei);
         } else {
             uint256 tokens = amountInWei.mul(stages[stageNumber].rate); 
-            _tokenPurchase(msg.sender, tokens);
-            emit TokenPurchased(msg.sender, amountInWei, tokens);
+            _tokenPurchase(_beneficiary, tokens);
+            emit TokenPurchased(msg.sender, _beneficiary, amountInWei, tokens);
         }
         _forwardFunds();
     }
