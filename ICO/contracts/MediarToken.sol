@@ -4,8 +4,8 @@ import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 
 contract MediarToken is StandardToken {
 
-    string public constant name = "MEDIAR TOKEN";
-    string public constant symbol = "MEDIAR";
+    string public constant name = "Mediar";
+    string public constant symbol = "MED";
     uint8 public constant decimals = 18;
 
     uint256 public constant INITIAL_SUPPLY = 200000000 * (10 ** uint256(decimals));
