@@ -39,8 +39,8 @@ contract TimedStagesCrowdsale {
     * @param value weis paid for purchase
     * @param amountOfTokens amount of tokens purchased
    */
-    event TokenPurchased(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amountOfTokens);
-    event PostponedTokenPurchased(address indexed purchaser, address indexed beneficiary, uint256 value);
+    event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amountOfTokens);
+    event PostponedTokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value);
 
     modifier onlyWhileOpen() {
         require(checkStage() >= 0);
@@ -96,11 +96,11 @@ contract TimedStagesCrowdsale {
 
         if (stages[stageNumber].stageType == StageType.Final) {
             _postponedTokenPurchase(_beneficiary, amountInWei);
-            emit PostponedTokenPurchased(msg.sender, _beneficiary, amountInWei);
+            emit PostponedTokenPurchase(msg.sender, _beneficiary, amountInWei);
         } else {
             uint256 tokens = amountInWei.mul(stages[stageNumber].rate); 
             _tokenPurchase(_beneficiary, tokens);
-            emit TokenPurchased(msg.sender, _beneficiary, amountInWei, tokens);
+            emit TokenPurchase(msg.sender, _beneficiary, amountInWei, tokens);
         }
         _forwardFunds();
     }

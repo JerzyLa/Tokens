@@ -15,11 +15,14 @@ const TimedStagesCrowdsale = artifacts.require('TimedStagesCrowdsale');
 const MediarToken = artifacts.require('MediarToken');
 
 contract('TimedStagesCrowdsale', function ([_, investor, wallet, purchaser]) {
-  const rate1 = new BigNumber(1);
-  const rate2 = new BigNumber(2);
-  const rate3 = new BigNumber(4);
-  const value = ether(42);
+  const rate1 = new BigNumber(40000000);
+  const rate2 = new BigNumber(20000000);
+  const rate3 = new BigNumber(10000000);
+  const value = ether(1);
   const tokenSupply = new BigNumber('2e26');
+  const expectedTokenAmount1 = rate1.mul(value);
+  const expectedTokenAmount2 = rate2.mul(value);
+  const expectedTokenAmount3 = rate3.mul(value);
 
   before(async function () {
     // Advance to the next block to correctly read time in the solidity "now" function interpreted by ganache
@@ -46,6 +49,11 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet, purchaser]) {
     await this.token.transfer(this.crowdsale.address, tokenSupply);
   });
 
+  it('crowdsale should have all token supply', async function () {
+    const balance = await this.token.balanceOf(this.crowdsale.address);
+    balance.should.be.bignumber.equal(tokenSupply);
+  });
+
   it('should be ended after last stage', async function () {
     let ended = await this.crowdsale.hasClosed();
     ended.should.equal(false);
@@ -54,22 +62,150 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet, purchaser]) {
     ended.should.equal(true);
   });
 
-  // describe('accepting payments', function () {
-  //   it('should reject payments before start', async function () {
-  //     await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
-  //     await this.crowdsale.buyTokens(investor, { from: purchaser, value: value }).should.be.rejectedWith(EVMRevert);
-  //   });
+  it('should be ended when no tokens left', async function () {
+    await increaseTimeTo(this.openingTime1);
+    let ended = await this.crowdsale.hasClosed();
+    ended.should.equal(false);
+    await this.crowdsale.buyTokens(investor, { value: value*5, from: purchaser });
+    const balance = await this.token.balanceOf(this.crowdsale.address);
+    balance.should.be.bignumber.equal(0);
+    ended = await this.crowdsale.hasClosed();
+    ended.should.equal(true);
+  });
 
-  //   it('should accept payments after start', async function () {
-  //     await increaseTimeTo(this.openingTime);
-  //     await this.crowdsale.send(value).should.be.fulfilled;
-  //     await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
-  //   });
+  describe('accepting payments', function () {
+    it('should reject payments before start', async function () {
+      await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(investor, { from: purchaser, value: value }).should.be.rejectedWith(EVMRevert);
+    });
 
-  //   it('should reject payments after end', async function () {
-  //     await increaseTimeTo(this.afterClosingTime);
-  //     await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
-  //     await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
-  //   });
-  // });
+    it('should accept payments after start first phase', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.send(value).should.be.fulfilled;
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
+    });
+
+    it('should accept payments after start second phase', async function () {
+      await increaseTimeTo(this.openingTime2);
+      await this.crowdsale.send(value).should.be.fulfilled;
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
+    });
+
+    it('should accept payments after start third phase', async function () {
+      await increaseTimeTo(this.openingTime3);
+      await this.crowdsale.send(value).should.be.fulfilled;
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
+    });
+
+    it('should accept payments after start fourth phase', async function () {
+      await increaseTimeTo(this.openingTime4);
+      await this.crowdsale.send(value).should.be.fulfilled;
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
+    });
+
+    it('should reject payments after end of first phase', async function () {
+      await increaseTimeTo(this.afterClosingTime1);
+      await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
+    });
+
+    it('should reject payments after end of second phase', async function () {
+      await increaseTimeTo(this.afterClosingTime2);
+      await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
+    });
+
+    it('should reject payments after end of third phase', async function () {
+      await increaseTimeTo(this.afterClosingTime3);
+      await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
+    });
+
+    it('should reject payments after end of fourth phase', async function () {
+      await increaseTimeTo(this.afterClosingTime4);
+      await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
+    });
+  });
+
+  describe('token purchases', function () {
+    it('should log purchase', async function () {
+      await increaseTimeTo(this.openingTime1);
+      const { logs } = await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+      const event = logs.find(e => e.event === 'TokenPurchase');
+      event.args.purchaser.should.equal(purchaser);
+      event.args.beneficiary.should.equal(investor);
+      event.args.value.should.be.bignumber.equal(value);
+      event.args.amountOfTokens.should.be.bignumber.equal(expectedTokenAmount1);
+    });
+
+    it('should log postponed purchase when phase 4', async function () {
+      await increaseTimeTo(this.openingTime4);
+      const { logs } = await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+      const event = logs.find(e => e.event === 'PostponedTokenPurchase');
+      event.args.purchaser.should.equal(purchaser);
+      event.args.beneficiary.should.equal(investor);
+      event.args.value.should.be.bignumber.equal(value);
+    });
+
+    it('should assign tokens to beneficiary in phase1', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(expectedTokenAmount1);
+    });
+
+    it('should assign tokens to beneficiary in phase2', async function () {
+      await increaseTimeTo(this.openingTime2);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(expectedTokenAmount2);
+    });
+
+    it('should assign tokens to beneficiary in phase3 ', async function () {
+      await increaseTimeTo(this.openingTime3);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(expectedTokenAmount3);
+    });
+
+    it('should not assign tokens to beneficiary in phase 4 (token delivery postponed)', async function () {
+      await increaseTimeTo(this.openingTime4);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(0);
+    });
+
+    it('should forward funds to wallet in phase 1 after purchase', async function () {
+      await increaseTimeTo(this.openingTime1);
+      const pre = web3.eth.getBalance(wallet);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const post = web3.eth.getBalance(wallet);
+      post.minus(pre).should.be.bignumber.equal(value);
+    });
+
+    it('should forward funds to wallet in phase 2 after purchase', async function () {
+      await increaseTimeTo(this.openingTime2);
+      const pre = web3.eth.getBalance(wallet);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const post = web3.eth.getBalance(wallet);
+      post.minus(pre).should.be.bignumber.equal(value);
+    });
+
+    it('should forward funds to wallet in phase 3 after purchase', async function () {
+      await increaseTimeTo(this.openingTime3);
+      const pre = web3.eth.getBalance(wallet);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const post = web3.eth.getBalance(wallet);
+      post.minus(pre).should.be.bignumber.equal(value);
+    });
+
+    it('should forward funds to wallet in phase 4 (token delivery postponed)', async function () {
+      await increaseTimeTo(this.openingTime4);
+      const pre = web3.eth.getBalance(wallet);
+      await this.crowdsale.buyTokens(investor, { value, from: purchaser });
+      const post = web3.eth.getBalance(wallet);
+      post.minus(pre).should.be.bignumber.equal(value);
+    });
+  });
 });
