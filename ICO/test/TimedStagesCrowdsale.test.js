@@ -49,28 +49,30 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet, purchaser]) {
     await this.token.transfer(this.crowdsale.address, tokenSupply);
   });
 
-  it('crowdsale should have all token supply', async function () {
-    const balance = await this.token.balanceOf(this.crowdsale.address);
-    balance.should.be.bignumber.equal(tokenSupply);
-  });
-
-  it('should be ended after last stage', async function () {
-    let ended = await this.crowdsale.hasClosed();
-    ended.should.equal(false);
-    await increaseTimeTo(this.afterClosingTime);
-    ended = await this.crowdsale.hasClosed();
-    ended.should.equal(true);
-  });
-
-  it('should be ended when no tokens left', async function () {
-    await increaseTimeTo(this.openingTime1);
-    let ended = await this.crowdsale.hasClosed();
-    ended.should.equal(false);
-    await this.crowdsale.buyTokens(investor, { value: value*5, from: purchaser });
-    const balance = await this.token.balanceOf(this.crowdsale.address);
-    balance.should.be.bignumber.equal(0);
-    ended = await this.crowdsale.hasClosed();
-    ended.should.equal(true);
+  describe('general crowdsale test', function () {
+    it('should have all token supply', async function () {
+      const balance = await this.token.balanceOf(this.crowdsale.address);
+      balance.should.be.bignumber.equal(tokenSupply);
+    });
+  
+    it('should be ended after last stage', async function () {
+      let ended = await this.crowdsale.hasClosed();
+      ended.should.equal(false);
+      await increaseTimeTo(this.afterClosingTime);
+      ended = await this.crowdsale.hasClosed();
+      ended.should.equal(true);
+    });
+  
+    it('should be ended when no tokens left', async function () {
+      await increaseTimeTo(this.openingTime1);
+      let ended = await this.crowdsale.hasClosed();
+      ended.should.equal(false);
+      await this.crowdsale.buyTokens(investor, { value: value*5, from: purchaser });
+      const balance = await this.token.balanceOf(this.crowdsale.address);
+      balance.should.be.bignumber.equal(0);
+      ended = await this.crowdsale.hasClosed();
+      ended.should.equal(true);
+    });
   });
 
   describe('accepting payments', function () {

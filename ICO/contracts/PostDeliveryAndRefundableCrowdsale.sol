@@ -17,13 +17,14 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
     RefundVault public vault;
 
     mapping(address => uint256) public weiBalances;
-    uint256 weiRaised;
-    uint256 tokensLeft;
+    uint256 public weiRaised;
+    uint256 public tokensLeft;
+    bool once = true;
 
     /**
      * @dev Constructor, creates RefundVault.
      */
-    function OwnerRefundableCrowdsale() public {
+    function PostDeliveryAndRefundableCrowdsale() public {
         vault = new RefundVault(wallet);
     }
 
@@ -40,7 +41,14 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
      * @dev Withdraw tokens only after crowdsale ends.
      */
     function withdrawTokens() public {
-        require(isFinalized);
+        require(hasClosed());
+        
+        // get tokens left after closing crowdsale
+        if(once) {
+            tokensLeft = token.balanceOf(this);
+            once = false;
+        } 
+        
         uint256 amount = (weiBalances[msg.sender].div(weiRaised)).mul(tokensLeft);
         require(amount > 0);
         weiBalances[msg.sender] = 0;
@@ -51,7 +59,6 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
      * @dev vault finalization task, called when owner calls finalize()
      */
     function finalization(bool success) internal {
-        tokensLeft = token.balanceOf(this);
         if (success) {
             vault.close();
         } else {
