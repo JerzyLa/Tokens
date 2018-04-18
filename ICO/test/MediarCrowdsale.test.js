@@ -14,7 +14,7 @@ const should = require('chai')
   const MediarCrowdsale = artifacts.require('MediarCrowdsale');
   const MediarToken = artifacts.require('MediarToken');
 
-  contract('MediarCrowdsale', function ([_, owner, wallet, thirdparty, investor, purchaser]) {
+  contract('MediarCrowdsale', function ([_, owner, wallet, thirdparty, investor, purchaser, investor1, investor2, investor3]) {
     const rate1 = new BigNumber(40000000);
     const rate2 = new BigNumber(20000000);
     const rate3 = new BigNumber(10000000);
@@ -77,7 +77,7 @@ const should = require('chai')
       });
     });
 
-    describe('Postponed tokens delivery', function() {
+    describe('Postponed tokens delivery (phase 4)', function() {
       it('should not immediately assign tokens to beneficiary in phase 4', async function () {
         await increaseTimeTo(this.openingTime4);
         await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
@@ -96,6 +96,76 @@ const should = require('chai')
         await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor }).should.be.fulfilled;
+      });
+
+      it('should return the amount of tokens bought', async function () {
+        await increaseTimeTo(this.openingTime4);
+        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await increaseTimeTo(this.afterClosingTime);
+        await this.crowdsale.withdrawTokens({ from: investor });
+        const balance = await this.token.balanceOf(investor);
+        balance.should.be.bignumber.equal(tokenSupply);
+      });
+
+      it('should spread the amount of tokens left to all purchases in this 4 phase', async function () {
+        await increaseTimeTo(this.openingTime1);
+        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+
+        await increaseTimeTo(this.openingTime4);
+        await this.crowdsale.buyTokens(investor1, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens(investor2, { value: value.mul(2), from: purchaser });
+        await this.crowdsale.buyTokens(investor3, { value: value.mul(3), from: purchaser });
+        await increaseTimeTo(this.afterClosingTime);
+        
+        await this.crowdsale.withdrawTokens({ from: investor1 });
+        let balance = await this.token.balanceOf(investor1);
+        balance.should.be.bignumber.equal('2.6666666666666666666666666e25');
+        
+        await this.crowdsale.withdrawTokens({ from: investor2 });
+        balance = await this.token.balanceOf(investor2);
+        balance.should.be.bignumber.equal('5.3333333333333333333333333e25');
+
+        await this.crowdsale.withdrawTokens({ from: investor3 });
+        balance = await this.token.balanceOf(investor3);
+        balance.should.be.bignumber.equal('8e25');
+      });
+    });
+
+    describe('Rafundable', function() {
+      it('should deny refunds before end', async function () {
+        await this.crowdsale.claimRefund({ from: investor }).should.be.rejectedWith(EVMRevert);
+        await increaseTimeTo(this.openingTime1);
+        await this.crowdsale.claimRefund({ from: investor }).should.be.rejectedWith(EVMRevert);
+      });
+    
+      it('should deny refunds after end if finalized succesfully', async function () {
+        await increaseTimeTo(this.openingTime1);
+        await this.crowdsale.sendTransaction({ value: value, from: investor });
+        await increaseTimeTo(this.afterClosingTime);
+        await this.crowdsale.finalize(true, { from: owner });
+        await this.crowdsale.claimRefund({ from: investor }).should.be.rejectedWith(EVMRevert);
+      });
+    
+      it('should allow refunds after end if finalized unsuccesfully', async function () {
+        await increaseTimeTo(this.openingTime1);
+        await this.crowdsale.sendTransaction({ value: value, from: investor });
+        await increaseTimeTo(this.afterClosingTime);
+        await this.crowdsale.finalize(false, { from: owner });
+        const pre = web3.eth.getBalance(investor);
+        await this.crowdsale.claimRefund({ from: investor, gasPrice: 0 })
+          .should.be.fulfilled;
+        const post = web3.eth.getBalance(investor);
+        post.minus(pre).should.be.bignumber.equal(value);
+      });
+    
+      it('should forward funds to wallet after end  finalized succesfully', async function () {
+        await increaseTimeTo(this.openingTime4);
+        await this.crowdsale.sendTransaction({ value: value, from: investor });
+        await increaseTimeTo(this.afterClosingTime);
+        const pre = web3.eth.getBalance(wallet);
+        await this.crowdsale.finalize(true, { from: owner });
+        const post = web3.eth.getBalance(wallet);
+        post.minus(pre).should.be.bignumber.equal(value);
       });
     });
   });

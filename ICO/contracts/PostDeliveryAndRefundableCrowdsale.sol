@@ -49,7 +49,7 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
             once = false;
         } 
         
-        uint256 amount = (weiBalances[msg.sender].div(weiRaised)).mul(tokensLeft);
+        uint256 amount = (weiBalances[msg.sender].mul(tokensLeft)).div(weiRaised);
         require(amount > 0);
         weiBalances[msg.sender] = 0;
         _tokenPurchase(msg.sender, amount);
