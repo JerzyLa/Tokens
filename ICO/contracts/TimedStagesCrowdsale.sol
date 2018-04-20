@@ -1,13 +1,14 @@
 pragma solidity ^0.4.21;
 
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "./ERC223/ERC223_interface.sol";
+import "./ERC223/ERC223_receiving_contract.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 // ----------------------------------------------------------------------------
 // @title TimedStagesCrowdsale
 // ----------------------------------------------------------------------------
-contract TimedStagesCrowdsale {
+contract TimedStagesCrowdsale is ERC223ReceivingContract {
     using SafeMath for uint256;
 
     enum StageType { Standard, Final }
@@ -21,7 +22,7 @@ contract TimedStagesCrowdsale {
     }
 
     // The token being sold
-    ERC20 public token;  // TODO: change token to ERC223 or different
+    ERC223Interface public token; 
     
     // Address where funds are collected
     address public wallet;
@@ -49,7 +50,7 @@ contract TimedStagesCrowdsale {
 
     function TimedStagesCrowdsale (
         address _wallet,
-        ERC20 _token, 
+        ERC223Interface _token, 
         uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
         uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
         uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3,
@@ -82,6 +83,11 @@ contract TimedStagesCrowdsale {
     // -----------------------------------------
     // Crowdsale external interface
     // -----------------------------------------
+
+    function tokenFallback(address _from, uint _value, bytes _data) public {
+        // accept only one type of ERC223 tokens
+        require(ERC223Interface(msg.sender) == token);
+    }
 
     function () external payable {
         buyTokens(msg.sender);

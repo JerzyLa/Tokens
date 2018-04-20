@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "./ERC223/ERC223_token.sol";
 
-contract MediarToken is StandardToken {
+contract MediarToken is ERC223Token {
 
     string public constant name = "Mediar";
     string public constant symbol = "MED";
@@ -14,8 +14,9 @@ contract MediarToken is StandardToken {
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
     function MediarToken() public {
-        totalSupply_ = INITIAL_SUPPLY;
+        totalSupply = INITIAL_SUPPLY;
         balances[msg.sender] = INITIAL_SUPPLY;
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY);
+        bytes memory empty;
+        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY, empty);
     }
 }

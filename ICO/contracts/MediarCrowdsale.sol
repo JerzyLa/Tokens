@@ -23,7 +23,7 @@ contract MediarCrowdsale is PostDeliveryAndRefundableCrowdsale {
 
     function MediarCrowdsale (
         address _wallet,
-        ERC20 _token, // TODO: change token to ERC223
+        ERC223Interface _token, 
         uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
         uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
         uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3,
