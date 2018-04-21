@@ -73,6 +73,11 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet, purchaser]) {
       ended = await this.crowdsale.hasClosed();
       ended.should.equal(true);
     });
+
+    it('should reject other tokens', async function () {
+      let newToken = await MediarToken.new();
+      await newToken.transfer(this.crowdsale.address, tokenSupply).should.be.rejectedWith(EVMRevert);
+    });
   });
 
   describe('accepting payments', function () {
