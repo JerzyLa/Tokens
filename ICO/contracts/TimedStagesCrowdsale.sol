@@ -30,18 +30,20 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
     // Amount of wei collected
     uint256 public collectedAmountInWei;
 
+    // Minimum amount of wei which can be invested
+    uint256 public minInvest;
+
     // Crowdsale stages
     Stage[4] stages;
 
    /**
     * Event for token purchase logging
-    * @param purchaser who bought tokens
-    * @param beneficiary who received tokens
+    * @param investor who bought tokens
     * @param value weis paid for purchase
     * @param amountOfTokens amount of tokens purchased
    */
-    event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amountOfTokens);
-    event PostponedTokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value);
+    event TokenPurchase(address indexed investor, uint256 value, uint256 amountOfTokens);
+    event PostponedTokenPurchase(address indexed investor, uint256 value);
 
     modifier onlyWhileOpen() {
         require(checkStage() >= 0);
@@ -51,6 +53,7 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
     function TimedStagesCrowdsale (
         address _wallet,
         ERC223Interface _token, 
+        uint256 _minInvest,
         uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
         uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
         uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3,
@@ -74,6 +77,7 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
 
         wallet = _wallet;
         token = _token;
+        minInvest = _minInvest;
         stages[0] = Stage(_rate1, _openingTime1, _closingTime1, StageType.Standard);
         stages[1] = Stage(_rate2, _openingTime2, _closingTime2, StageType.Standard);
         stages[2] = Stage(_rate3, _openingTime3, _closingTime3, StageType.Standard);
@@ -84,29 +88,29 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
     // Crowdsale external interface
     // -----------------------------------------
 
-    function tokenFallback(address _from, uint _value, bytes _data) public {
+    function tokenFallback(address /*_from*/, uint /*_value*/, bytes /*_data*/) public {
         // accept only one type of ERC223 tokens
         require(ERC223Interface(msg.sender) == token);
     }
 
     function () external payable {
-        buyTokens(msg.sender);
+        buyTokens();
     }
 
-    function buyTokens(address _beneficiary) public payable onlyWhileOpen {
-        require(_beneficiary != 0);
-        
+    function buyTokens() public payable onlyWhileOpen {
         uint256 amountInWei = msg.value;
+        require(amountInWei >= minInvest);
+        
         uint8 stageNumber = uint8(checkStage());
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
         if (stages[stageNumber].stageType == StageType.Final) {
-            _postponedTokenPurchase(_beneficiary, amountInWei);
-            emit PostponedTokenPurchase(msg.sender, _beneficiary, amountInWei);
+            _postponedTokenPurchase(msg.sender, amountInWei);
+            emit PostponedTokenPurchase(msg.sender, amountInWei);
         } else {
             uint256 tokens = amountInWei.mul(stages[stageNumber].rate); 
-            _tokenPurchase(_beneficiary, tokens);
-            emit TokenPurchase(msg.sender, _beneficiary, amountInWei, tokens);
+            _tokenPurchase(msg.sender, tokens);
+            emit TokenPurchase(msg.sender, amountInWei, tokens);
         }
         _forwardFunds();
     }
@@ -136,10 +140,10 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
         wallet.transfer(msg.value);
     }
 
-    function _tokenPurchase(address beneficiary, uint tokens) internal {
-        token.transfer(beneficiary, tokens);
+    function _tokenPurchase(address investor, uint tokens) internal {
+        token.transfer(investor, tokens);
     }
 
-    function _postponedTokenPurchase(address /*beneficiary*/, uint /*amount*/) internal {
+    function _postponedTokenPurchase(address /*investor*/, uint /*amount*/) internal {
     }
 }

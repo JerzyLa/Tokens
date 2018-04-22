@@ -14,10 +14,11 @@ const should = require('chai')
   const MediarCrowdsale = artifacts.require('MediarCrowdsale');
   const MediarToken = artifacts.require('MediarToken');
 
-  contract('MediarCrowdsale', function ([_, owner, wallet, thirdparty, investor, purchaser, investor1, investor2, investor3]) {
+  contract('MediarCrowdsale', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
     const rate1 = new BigNumber(40000000);
     const rate2 = new BigNumber(20000000);
     const rate3 = new BigNumber(10000000);
+    const minInvest = new BigNumber('5e17');
     const value = ether(1);
     const tokenSupply = new BigNumber('2e26');
 
@@ -39,7 +40,7 @@ const should = require('chai')
       this.afterClosingTime = this.closingTime4 + duration.seconds(1);
       
       this.token = await MediarToken.new();
-      this.crowdsale = await MediarCrowdsale.new(wallet, this.token.address, 
+      this.crowdsale = await MediarCrowdsale.new(wallet, this.token.address, minInvest,
         rate1, this.openingTime1, this.closingTime1,
         rate2, this.openingTime2, this.closingTime2,
         rate3, this.openingTime3, this.closingTime3,
@@ -80,27 +81,27 @@ const should = require('chai')
     describe('Postponed tokens delivery (phase 4)', function() {
       it('should not immediately assign tokens to beneficiary in phase 4', async function () {
         await increaseTimeTo(this.openingTime4);
-        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor });
         const balance = await this.token.balanceOf(investor);
         balance.should.be.bignumber.equal(0);
       });
 
       it('should not allow beneficiaries to withdraw tokens before crowdsale ends', async function () {
         await increaseTimeTo(this.beforeEndTime);
-        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor });
         await this.crowdsale.withdrawTokens({ from: investor }).should.be.rejectedWith(EVMRevert);
       });
 
       it('should allow beneficiaries to withdraw tokens after crowdsale ends', async function () {
         await increaseTimeTo(this.openingTime4);
-        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor }).should.be.fulfilled;
       });
 
       it('should return the amount of tokens bought', async function () {
         await increaseTimeTo(this.openingTime4);
-        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor });
         const balance = await this.token.balanceOf(investor);
@@ -109,12 +110,12 @@ const should = require('chai')
 
       it('should spread the amount of tokens left to all purchases in this 4 phase', async function () {
         await increaseTimeTo(this.openingTime1);
-        await this.crowdsale.buyTokens(investor, { value: value, from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor });
 
         await increaseTimeTo(this.openingTime4);
-        await this.crowdsale.buyTokens(investor1, { value: value, from: purchaser });
-        await this.crowdsale.buyTokens(investor2, { value: value.mul(2), from: purchaser });
-        await this.crowdsale.buyTokens(investor3, { value: value.mul(3), from: purchaser });
+        await this.crowdsale.buyTokens({ value: value, from: investor1 });
+        await this.crowdsale.buyTokens({ value: value.mul(2), from: investor2 });
+        await this.crowdsale.buyTokens({ value: value.mul(3), from: investor3 });
         await increaseTimeTo(this.afterClosingTime);
         
         await this.crowdsale.withdrawTokens({ from: investor1 });
