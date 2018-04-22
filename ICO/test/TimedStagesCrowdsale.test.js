@@ -18,7 +18,7 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet]) {
   const rate1 = new BigNumber(40000000);
   const rate2 = new BigNumber(20000000);
   const rate3 = new BigNumber(10000000);
-  const minInvest = new BigNumber('5e17');
+  const minInvest = new BigNumber('1e17');
   const value = ether(1);
   const tokenSupply = new BigNumber('2e26');
   const expectedTokenAmount1 = rate1.mul(value);
@@ -91,6 +91,13 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet]) {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.send(value).should.be.fulfilled;
       await this.crowdsale.buyTokens({ value: value, from: investor }).should.be.fulfilled;
+    });
+
+    it('should reject too low payments', async function () {
+      await increaseTimeTo(this.openingTime1);
+      const tooLowInvest = minInvest - 10;
+      await this.crowdsale.send(tooLowInvest).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens({ value: tooLowInvest, from: investor }).should.be.rejectedWith(EVMRevert);
     });
 
     it('should accept payments after start second phase', async function () {
