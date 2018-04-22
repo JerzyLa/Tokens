@@ -38,21 +38,51 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
     }
 
     /**
+     * @dev As an owner refund for investor if crowdsale is unsuccessful
+     */
+    function claimRefundForInvestor(address investor) public onlyOwner {
+        require(isFinalized);
+        require(investor != address(0));
+
+        vault.refund(investor);
+    }
+
+    /**
      * @dev Withdraw tokens only after crowdsale ends.
      */
     function withdrawTokens() public {
         require(hasClosed());
         
         // get tokens left after closing crowdsale
-        if(once) {
-            tokensLeft = token.balanceOf(this);
-            once = false;
-        } 
+        getTokensLeftOnlyOnce();
         
         uint256 amount = (weiBalances[msg.sender].mul(tokensLeft)).div(weiRaised);
         require(amount > 0);
         weiBalances[msg.sender] = 0;
         _tokenPurchase(msg.sender, amount);
+    }
+
+    /**
+     * @dev As an owner withdraw tokens for investor only after crowdsale ends.
+     */
+    function withdrawTokensForInvestor(address investor) public onlyOwner {
+        require(hasClosed());
+        require(investor != address(0));
+
+        // get tokens left after closing crowdsale
+        getTokensLeftOnlyOnce();
+
+        uint256 amount = (weiBalances[investor].mul(tokensLeft)).div(weiRaised);
+        require(amount > 0);
+        weiBalances[investor] = 0;
+        _tokenPurchase(investor, amount);
+    }
+
+    function getTokensLeftOnlyOnce() internal {
+        if(once) {
+            tokensLeft = token.balanceOf(this);
+            once = false;
+        } 
     }
 
     /**

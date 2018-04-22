@@ -99,11 +99,20 @@ const should = require('chai')
         await this.crowdsale.withdrawTokens({ from: investor }).should.be.fulfilled;
       });
 
-      it('should return the amount of tokens bought', async function () {
+      it('should allow to withdraw tokens after phase 4', async function () {
         await increaseTimeTo(this.openingTime4);
         await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor });
+        const balance = await this.token.balanceOf(investor);
+        balance.should.be.bignumber.equal(tokenSupply);
+      });
+
+      it('should allow owner to withdraw tokens for investor after phase 4', async function () {
+        await increaseTimeTo(this.openingTime4);
+        await this.crowdsale.buyTokens({ value: value, from: investor });
+        await increaseTimeTo(this.afterClosingTime);
+        await this.crowdsale.withdrawTokensForInvestor(investor, { from: owner });
         const balance = await this.token.balanceOf(investor);
         balance.should.be.bignumber.equal(tokenSupply);
       });
@@ -154,6 +163,18 @@ const should = require('chai')
         await this.crowdsale.finalize(false, { from: owner });
         const pre = web3.eth.getBalance(investor);
         await this.crowdsale.claimRefund({ from: investor, gasPrice: 0 })
+          .should.be.fulfilled;
+        const post = web3.eth.getBalance(investor);
+        post.minus(pre).should.be.bignumber.equal(value);
+      });
+
+      it('should allow owner to refund for investor after end if finalized unsuccesfully', async function () {
+        await increaseTimeTo(this.openingTime1);
+        await this.crowdsale.sendTransaction({ value: value, from: investor });
+        await increaseTimeTo(this.afterClosingTime);
+        await this.crowdsale.finalize(false, { from: owner });
+        const pre = web3.eth.getBalance(investor);
+        await this.crowdsale.claimRefundForInvestor(investor, { from: owner, gasPrice: 0 })
           .should.be.fulfilled;
         const post = web3.eth.getBalance(investor);
         post.minus(pre).should.be.bignumber.equal(value);
