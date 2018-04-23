@@ -51,21 +51,17 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
      * @dev Withdraw tokens only after crowdsale ends.
      */
     function withdrawTokens() public {
-        require(hasClosed());
-        
-        // get tokens left after closing crowdsale
-        getTokensLeftOnlyOnce();
-        
-        uint256 amount = (weiBalances[msg.sender].mul(tokensLeft)).div(weiRaised);
-        require(amount > 0);
-        weiBalances[msg.sender] = 0;
-        _tokenPurchase(msg.sender, amount);
+        _withdrawTokens(msg.sender);
     }
 
     /**
      * @dev As an owner withdraw tokens for investor only after crowdsale ends.
      */
     function withdrawTokensForInvestor(address investor) public onlyOwner {
+        _withdrawTokens(investor);
+    }
+
+    function _withdrawTokens(address investor) internal {
         require(hasClosed());
         require(investor != address(0));
 
