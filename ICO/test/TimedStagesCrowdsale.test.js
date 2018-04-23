@@ -14,7 +14,7 @@ require('chai')
 const TimedStagesCrowdsale = artifacts.require('TimedStagesCrowdsale');
 const MediarToken = artifacts.require('MediarToken');
 
-contract('TimedStagesCrowdsale', function ([_, investor, wallet]) {
+contract('TimedStagesCrowdsale', function ([_, owner, investor, wallet]) {
   const rate1 = new BigNumber(40000000);
   const rate2 = new BigNumber(20000000);
   const rate3 = new BigNumber(10000000);
@@ -41,13 +41,16 @@ contract('TimedStagesCrowdsale', function ([_, investor, wallet]) {
     this.closingTime4 = this.openingTime4 + duration.weeks(1);
     this.afterClosingTime = this.closingTime4 + duration.seconds(1);
     
-    this.token = await MediarToken.new();
+    this.token = await MediarToken.new({ from: owner });
     this.crowdsale = await TimedStagesCrowdsale.new(wallet, this.token.address, minInvest,
       rate1, this.openingTime1, this.closingTime1,
       rate2, this.openingTime2, this.closingTime2,
       rate3, this.openingTime3, this.closingTime3,
       this.openingTime4, this.closingTime4);
-    await this.token.transfer(this.crowdsale.address, tokenSupply);
+
+    await this.token.setTransferAgent(owner, true, { from: owner });
+    await this.token.setTransferAgent(this.crowdsale.address, true, { from: owner });
+    await this.token.transfer(this.crowdsale.address, tokenSupply, { from: owner });
   });
 
   describe('general crowdsale test', function () {

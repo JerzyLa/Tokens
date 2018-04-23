@@ -1,20 +1,19 @@
 pragma solidity ^0.4.21;
 
-import "./ERC223/ERC223_interface.sol";
-import "./ERC223/ERC223_receiving_contract.sol";
+import "./Tokens/ReleasableToken.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 // ----------------------------------------------------------------------------
 // @title TimedStagesCrowdsale
 // ----------------------------------------------------------------------------
-contract TimedStagesCrowdsale is ERC223ReceivingContract {
+contract TimedStagesCrowdsale is ContractReceiver {
     using SafeMath for uint256;
 
     enum StageType { Standard, Final }
 
     struct Stage {
-        // How meny token units a buyer gets per wei
+        // How meny token units a buyer gets per ether
         uint256 rate;
         uint256 openingTime;
         uint256 closingTime;
@@ -22,7 +21,7 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
     }
 
     // The token being sold
-    ERC223Interface public token; 
+    ReleasableToken public token; 
     
     // Address where funds are collected
     address public wallet;
@@ -52,7 +51,7 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
 
     function TimedStagesCrowdsale (
         address _wallet,
-        ERC223Interface _token, 
+        ReleasableToken _token, 
         uint256 _minInvest,
         uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
         uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
@@ -90,7 +89,7 @@ contract TimedStagesCrowdsale is ERC223ReceivingContract {
 
     function tokenFallback(address /*_from*/, uint /*_value*/, bytes /*_data*/) public {
         // accept only one type of ERC223 tokens
-        require(ERC223Interface(msg.sender) == token);
+        require(ReleasableToken(msg.sender) == token);
     }
 
     function () external payable {

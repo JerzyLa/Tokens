@@ -1,22 +1,15 @@
 pragma solidity ^0.4.21;
 
-import "./ERC223/ERC223_token.sol";
+import "./Tokens/AMLToken.sol";
 
-contract MediarToken is ERC223Token {
+contract MediarToken is AMLToken {
 
-    string public constant name = "Mediar";
-    string public constant symbol = "MED";
-    uint8 public constant decimals = 18;
-
-    uint256 public constant INITIAL_SUPPLY = 400000000 * (10 ** uint256(decimals));
+    uint256 public constant INITIAL_SUPPLY = 400000000 * (10 ** uint256(18));
 
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
-    function MediarToken() public {
-        totalSupply = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY;
-        bytes memory empty;
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY, empty);
+    function MediarToken() public 
+        AMLToken("Mediar", "MED", INITIAL_SUPPLY, 18) {
     }
 }

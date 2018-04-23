@@ -39,14 +39,18 @@ const should = require('chai')
       this.beforeEndTime = this.closingTime4 - duration.hours(1);
       this.afterClosingTime = this.closingTime4 + duration.seconds(1);
       
-      this.token = await MediarToken.new();
+      this.token = await MediarToken.new({ from: owner });
       this.crowdsale = await MediarCrowdsale.new(wallet, this.token.address, minInvest,
         rate1, this.openingTime1, this.closingTime1,
         rate2, this.openingTime2, this.closingTime2,
         rate3, this.openingTime3, this.closingTime3,
         this.openingTime4, this.closingTime4, { from: owner }
       );
-      await this.token.transfer(this.crowdsale.address, tokenSupply);
+
+      await this.token.setTransferAgent(owner, true, { from: owner });
+      await this.token.setTransferAgent(this.crowdsale.address, true, { from: owner });
+      await this.token.setReleaseAgent(this.crowdsale.address, { from: owner });
+      await this.token.transfer(this.crowdsale.address, tokenSupply, { from: owner });
     });
 
     describe('Crowdsale finalization', function () {

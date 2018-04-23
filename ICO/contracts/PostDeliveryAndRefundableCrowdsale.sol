@@ -91,6 +91,7 @@ contract PostDeliveryAndRefundableCrowdsale is FinalizableCrowdsale {
             vault.enableRefunds();
         }
 
+        token.releaseTokenTransfer();
         super.finalization(success);
     }
 
