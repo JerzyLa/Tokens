@@ -10,6 +10,6 @@ contract MediarToken is AMLToken {
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
     function MediarToken() public 
-        AMLToken("Mediar", "MED", INITIAL_SUPPLY, 18) {
+        AMLToken("Mediar", "MDR", INITIAL_SUPPLY, 18) {
     }
 }

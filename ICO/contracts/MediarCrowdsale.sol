@@ -25,17 +25,15 @@ contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
 
     function MediarCrowdsale (
         address _wallet,
-        ReleasableToken _token, 
-        uint256 _minInvest,
-        uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
-        uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
-        uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3,
-        uint256 _finalOpeningTime, uint256 _finalClosingTime
+        ReleasableToken _token
     ) 
         public
-        TimedStagesCrowdsale(_wallet, _token, _minInvest, _rate1, _openingTime1, _closingTime1,
-            _rate2, _openingTime2, _closingTime2, _rate3, _openingTime3, _closingTime3, 
-            _finalOpeningTime, _finalClosingTime)
+        TimedStagesCrowdsale(_wallet, _token)
     {
+        stages.push(Stage(4000, 500 finney, 1524687000, 1524687000, StageType.Standard));
+        stages.push(Stage(3000, 200 finney, 1524687000, 1524687000, StageType.Standard));
+        stages.push(Stage(2500, 200 finney, 1524687000, 1524687000, StageType.Standard));
+        stages.push(Stage(2000, 200 finney, 1524687000, 1524687000, StageType.Standard));
+        stages.push(Stage(0, 200 finney, 1524687000, 1524687000, StageType.PostDelivery));
     }
 }

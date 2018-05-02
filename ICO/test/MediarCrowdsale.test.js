@@ -18,7 +18,7 @@ const should = require('chai')
     const rate1 = new BigNumber(40000000);
     const rate2 = new BigNumber(20000000);
     const rate3 = new BigNumber(10000000);
-    const minInvest = new BigNumber('5e17');
+    const rate4 = new BigNumber(5000000);
     const value = ether(1);
     const tokenSupply = new BigNumber('2e26');
 
@@ -36,15 +36,17 @@ const should = require('chai')
       this.closingTime3 = this.openingTime3 + duration.weeks(1);
       this.openingTime4 = this.closingTime3 + duration.weeks(1);
       this.closingTime4 = this.openingTime4 + duration.weeks(1);
-      this.beforeEndTime = this.closingTime4 - duration.hours(1);
-      this.afterClosingTime = this.closingTime4 + duration.seconds(1);
+      this.openingTimeLast = this.closingTime4 + duration.weeks(1);
+      this.closingTimeLast = this.openingTimeLast + duration.weeks(1);
+      this.afterClosingTime = this.closingTimeLast + duration.seconds(1);
       
       this.token = await MediarToken.new({ from: owner });
-      this.crowdsale = await MediarCrowdsale.new(wallet, this.token.address, minInvest,
+      this.crowdsale = await MediarCrowdsale.new(wallet, this.token.address,
         rate1, this.openingTime1, this.closingTime1,
         rate2, this.openingTime2, this.closingTime2,
         rate3, this.openingTime3, this.closingTime3,
-        this.openingTime4, this.closingTime4, { from: owner }
+        rate4, this.openingTime4, this.openingTime4,
+        this.openingTimeLast, this.closingTimeLast, { from: owner }
       );
 
       await this.token.setTransferAgent(owner, true, { from: owner });
@@ -80,11 +82,18 @@ const should = require('chai')
         const event = logs.find(e => e.event === 'Finalized');
         should.exist(event);
       });
+
+      it('should reject too low payments', async function () {
+        await increaseTimeTo(this.openingTime1);
+        const tooLowInvest = new BigNumber('5e17') - 10;
+        await this.crowdsale.send(tooLowInvest).should.be.rejectedWith(EVMRevert);
+        await this.crowdsale.buyTokens({ value: tooLowInvest, from: investor }).should.be.rejectedWith(EVMRevert);
+      });
     });
 
     describe('Postponed tokens delivery (phase 4)', function() {
       it('should not immediately assign tokens to beneficiary in phase 4', async function () {
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.buyTokens({ value: value, from: investor });
         const balance = await this.token.balanceOf(investor);
         balance.should.be.bignumber.equal(0);
@@ -97,14 +106,14 @@ const should = require('chai')
       });
 
       it('should allow beneficiaries to withdraw tokens after crowdsale ends', async function () {
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor }).should.be.fulfilled;
       });
 
       it('should allow to withdraw tokens after phase 4', async function () {
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokens({ from: investor });
@@ -113,7 +122,7 @@ const should = require('chai')
       });
 
       it('should allow owner to withdraw tokens for investor after phase 4', async function () {
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.buyTokens({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         await this.crowdsale.withdrawTokensForInvestor(investor, { from: owner });
@@ -125,7 +134,7 @@ const should = require('chai')
         await increaseTimeTo(this.openingTime1);
         await this.crowdsale.buyTokens({ value: value, from: investor });
 
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.buyTokens({ value: value, from: investor1 });
         await this.crowdsale.buyTokens({ value: value.mul(2), from: investor2 });
         await this.crowdsale.buyTokens({ value: value.mul(3), from: investor3 });
@@ -185,7 +194,7 @@ const should = require('chai')
       });
     
       it('should forward funds to wallet after end  finalized succesfully', async function () {
-        await increaseTimeTo(this.openingTime4);
+        await increaseTimeTo(this.openingTimeLast);
         await this.crowdsale.sendTransaction({ value: value, from: investor });
         await increaseTimeTo(this.afterClosingTime);
         const pre = web3.eth.getBalance(wallet);

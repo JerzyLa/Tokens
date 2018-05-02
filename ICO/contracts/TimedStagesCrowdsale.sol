@@ -10,11 +10,12 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 contract TimedStagesCrowdsale is ContractReceiver {
     using SafeMath for uint256;
 
-    enum StageType { Standard, Final }
+    enum StageType { Standard, PostDelivery }
 
     struct Stage {
         // How meny token units a buyer gets per ether
         uint256 rate;
+        uint256 minInvest;
         uint256 openingTime;
         uint256 closingTime;
         StageType stageType;
@@ -29,11 +30,8 @@ contract TimedStagesCrowdsale is ContractReceiver {
     // Amount of wei collected
     uint256 public collectedAmountInWei;
 
-    // Minimum amount of wei which can be invested
-    uint256 public minInvest;
-
     // Crowdsale stages
-    Stage[4] stages;
+    Stage[] public stages;
 
    /**
     * Event for token purchase logging
@@ -51,36 +49,15 @@ contract TimedStagesCrowdsale is ContractReceiver {
 
     function TimedStagesCrowdsale (
         address _wallet,
-        ReleasableToken _token, 
-        uint256 _minInvest,
-        uint256 _rate1, uint256 _openingTime1, uint256 _closingTime1,
-        uint256 _rate2, uint256 _openingTime2, uint256 _closingTime2,
-        uint256 _rate3, uint256 _openingTime3, uint256 _closingTime3,
-        uint256 _finalOpeningTime, uint256 _finalClosingTime
+        ReleasableToken _token
     ) 
         public
     {
         require(_wallet != address(0));
         require(_token != address(0));
-        require(_rate1 > 0);
-        require(_openingTime1 >= block.timestamp);
-        require(_closingTime1 >= _openingTime1);
-        require(_rate2 > 0);
-        require(_openingTime2 >= _closingTime1);
-        require(_closingTime2 >= _openingTime2);
-        require(_rate3 > 0);
-        require(_openingTime3 >= _closingTime2);
-        require(_closingTime3 >= _openingTime3);
-        require(_finalOpeningTime >= _closingTime3);
-        require(_finalClosingTime >= _finalOpeningTime);
 
         wallet = _wallet;
         token = _token;
-        minInvest = _minInvest;
-        stages[0] = Stage(_rate1, _openingTime1, _closingTime1, StageType.Standard);
-        stages[1] = Stage(_rate2, _openingTime2, _closingTime2, StageType.Standard);
-        stages[2] = Stage(_rate3, _openingTime3, _closingTime3, StageType.Standard);
-        stages[3] = Stage(0, _finalOpeningTime, _finalClosingTime, StageType.Final);
     }
 
     // -----------------------------------------
@@ -98,12 +75,12 @@ contract TimedStagesCrowdsale is ContractReceiver {
 
     function buyTokens() public payable onlyWhileOpen {
         uint256 amountInWei = msg.value;
-        require(amountInWei >= minInvest);
-        
         uint8 stageNumber = uint8(checkStage());
+        require(amountInWei >= stages[stageNumber].minInvest);
+
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
-        if (stages[stageNumber].stageType == StageType.Final) {
+        if (stages[stageNumber].stageType == StageType.PostDelivery) {
             _postponedTokenPurchase(msg.sender, amountInWei);
             emit PostponedTokenPurchase(msg.sender, amountInWei);
         } else {
