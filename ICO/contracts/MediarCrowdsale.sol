@@ -1,10 +1,11 @@
 pragma solidity ^0.4.21;
 
-import "./PostDeliveryAndRefundableCrowdsale.sol";
+import "./RefundableCrowdsale.sol";
+import "./PostDeliveryCrowdsale.sol";
 
 // ----------------------------------------------------------------------------
 // @title MediarCrowdsale
-// @dev Crowdsale contract is used for selling ERC20 tokens for setup price.
+// @dev Crowdsale contract is used for selling ERC223 tokens for setup price.
 // Below points describes rules for distributing tokens by this contract.
 //      1. Sale is only available during certain period of time called phase.
 //         There will be only 4 phases during whole ICO distribution.
@@ -16,9 +17,10 @@ import "./PostDeliveryAndRefundableCrowdsale.sol";
 //         amount of tokens will not take part in final token distribution) 
 //      4. After final phase there will not be possible to buy more tokens. 
 //         Payable functions will be disabled.
-//      5. Refunding when goal not reached, withdrawl when goal is reached.
+//      5. Refunding when goal not reached, withdrawl when crowdsale is finished.
+//      6. AML token support
 // ----------------------------------------------------------------------------
-contract MediarCrowdsale is PostDeliveryAndRefundableCrowdsale {
+contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
     using SafeMath for uint256;
 
     function MediarCrowdsale (
