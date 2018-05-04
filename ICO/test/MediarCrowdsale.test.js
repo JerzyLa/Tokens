@@ -166,7 +166,17 @@ contract('MediarCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
       post.minus(pre).should.be.bignumber.equal(value);
     });
 
-    it('should allow owner to refund for investor after end if finalized unsuccesfully', async function () {
+    it('should allow owner to alwayes refund for investor (before end case)', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.sendTransaction({ value: value, from: investor });
+      const pre = web3.eth.getBalance(investor);
+      await this.crowdsale.claimRefundForInvestor(investor, { from: owner, gasPrice: 0 })
+        .should.be.fulfilled;
+      const post = web3.eth.getBalance(investor);
+      post.minus(pre).should.be.bignumber.equal(value);
+    });
+
+    it('should allow owner to  alwayes refund for investor (after end case)', async function () {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.sendTransaction({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21; 
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol"; 
-import "zeppelin-solidity/contracts/crowdsale/distribution/utils/RefundVault.sol"; 
+import "./utils/RefundVaultExt.sol"; 
 import "./FinalizableCrowdsale.sol"; 
 
 /**
@@ -14,13 +14,13 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     using SafeMath for uint256;
 
     // refund vault used to hold funds while crowdsale is running
-    RefundVault public vault;
+    RefundVaultExt public vault;
 
     /**
      * @dev Constructor, creates RefundVault.
      */
     function RefundableCrowdsale() public {
-        vault = new RefundVault(wallet);
+        vault = new RefundVaultExt(wallet);
     }
 
     /**
@@ -33,13 +33,13 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     }
 
     /**
-     * @dev As an owner refund for investor if crowdsale is unsuccessful
+     * @dev As an owner refund for investor, used when KYC 
+     * check didn't pass.
      */
     function claimRefundForInvestor(address investor) public onlyOwner {
-        require(isFinalized);
         require(investor != address(0));
 
-        vault.refund(investor);
+        vault.refundAsOwner(investor);
     }
 
     /**
