@@ -12,7 +12,7 @@ require('chai')
   .should();
 
 const TimedStagesCrowdsaleImpl = artifacts.require('TimedStagesCrowdsaleImpl');
-const MediarToken = artifacts.require('MediarToken');
+const CustomToken = artifacts.require('CustomToken');
 
 contract('TimedStagesCrowdsaleImpl', function ([_, owner, investor, wallet]) {
   const rate1 = new BigNumber(100000000);
@@ -34,7 +34,7 @@ contract('TimedStagesCrowdsaleImpl', function ([_, owner, investor, wallet]) {
     this.closingTimeLast = this.openingTimeLast + duration.weeks(1);
     this.afterClosingTime = this.closingTimeLast + duration.seconds(1);
     
-    this.token = await MediarToken.new({ from: owner });
+    this.token = await CustomToken.new({ from: owner });
     this.crowdsale = await TimedStagesCrowdsaleImpl.new(wallet, this.token.address, 
       rate1, minInvest1, this.openingTime1, this.closingTime1,
       minInvest2, this.openingTimeLast, this.closingTimeLast

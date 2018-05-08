@@ -4,8 +4,8 @@ import "../PostDeliveryCrowdsale.sol";
 import "../RefundableCrowdsale.sol";
 
 
-contract MediarCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
-    function MediarCrowdsaleImpl (
+contract CustomCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
+    function CustomCrowdsaleImpl (
         address _wallet,
         ReleasableToken _token,
         uint256 _rate1,

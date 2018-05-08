@@ -4,7 +4,7 @@ import "./RefundableCrowdsale.sol";
 import "./PostDeliveryCrowdsale.sol";
 
 // ----------------------------------------------------------------------------
-// @title MediarCrowdsale
+// @title CustomCrowdsale
 // @dev Crowdsale contract is used for selling ERC223 tokens for setup price.
 // Below points describes rules for distributing tokens by this contract.
 //      1. Sale is only available during certain period of time called phase.
@@ -20,18 +20,18 @@ import "./PostDeliveryCrowdsale.sol";
 //      5. Refunding when goal not reached, withdrawl when crowdsale is finished.
 //      6. AML token support
 // ----------------------------------------------------------------------------
-contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
+contract CustomCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
     using SafeMath for uint256;
 
-    function MediarCrowdsale (
+    function CustomCrowdsale (
         address _wallet,
         ReleasableToken _token
     ) 
         public
         TimedStagesCrowdsale(_wallet, _token)
     {
-        stages.push(Stage(4000, 500 finney, 1524687000, 1524687000, StageType.Standard));
-        stages.push(Stage(3000, 200 finney, 1524687000, 1524687000, StageType.Standard));
+        stages.push(Stage(4000, 500 finney, 1526342400, 1529020800, StageType.Standard));
+        stages.push(Stage(3000, 200 finney, 1529107200, 1531699200, StageType.Standard));
         stages.push(Stage(2500, 200 finney, 1524687000, 1524687000, StageType.Standard));
         stages.push(Stage(2000, 200 finney, 1524687000, 1524687000, StageType.Standard));
         stages.push(Stage(0, 200 finney, 1524687000, 1524687000, StageType.PostDelivery));
