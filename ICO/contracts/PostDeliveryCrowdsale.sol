@@ -10,9 +10,9 @@ import "./TimedStagesCrowdsale.sol";
 contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
     using SafeMath for uint256;
 
-    mapping(address => uint256) public weiBalances;
+    mapping(address => uint256) public shares;
 
-    uint256 public weiRaised;
+    uint256 public totalShares;
     
     // all tokens which will be distributed among post delivery purchases
     uint256 public tokensForDistribution;
@@ -40,9 +40,9 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
         // get tokens left after closing crowdsale
         getTokensForDistribution();
 
-        uint256 amount = (weiBalances[investor].mul(tokensForDistribution)).div(weiRaised);
-        require(amount > 0);
-        weiBalances[investor] = 0;
+        uint256 amount = tokensForDistribution.mul(shares[investor]).div(totalShares);
+        require(amount != 0);
+        shares[investor] = 0;
         _tokenPurchase(investor, amount);
     }
 
@@ -59,8 +59,8 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
      * @param _amountInWei payed for tokens
      */
     function _postponedTokenPurchase(address _beneficiary, uint256 _amountInWei) internal {
-        weiBalances[_beneficiary] = weiBalances[_beneficiary].add(_amountInWei);
-        weiRaised = weiRaised.add(_amountInWei);
+        shares[_beneficiary] = shares[_beneficiary].add(_amountInWei);
+        totalShares = totalShares.add(_amountInWei);
     }
 
 }
