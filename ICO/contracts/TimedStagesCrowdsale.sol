@@ -1,8 +1,9 @@
 pragma solidity ^0.4.21;
 
-import "./ERC223/ERC223_Interface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./ERC223/ERC223_Interface.sol";
+import "./ERC223/Receiver_Interface.sol";
 
 // ----------------------------------------------------------------------------
 // @title TimedStagesCrowdsale

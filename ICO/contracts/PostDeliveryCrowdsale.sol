@@ -19,12 +19,6 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
     
     bool once = true;
 
-    modifier onlyOnce() {
-        require(once);
-        once = false;
-        _;
-    }
-
     /**
      * @dev Withdraw tokens only after crowdsale ends.
      */
@@ -52,8 +46,11 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
         _tokenPurchase(investor, amount);
     }
 
-    function getTokensForDistribution() internal onlyOnce {
-        tokensForDistribution = token.balanceOf(this);
+    function getTokensForDistribution() internal {
+        if(once) {
+            once = false;
+            tokensForDistribution = token.balanceOf(this);
+        }
     }
 
     /**

@@ -71,7 +71,7 @@ contract('TimedStagesCrowdsaleImpl', function ([_, owner, investor, wallet]) {
     });
 
     it('should reject other tokens', async function () {
-      let newToken = await MediarToken.new();
+      let newToken = await CustomToken.new();
       await newToken.transfer(this.crowdsale.address, tokenSupply).should.be.rejectedWith(EVMRevert);
     });
   });

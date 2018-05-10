@@ -3,7 +3,7 @@ pragma solidity ^0.4.21;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
 import "./utils/RefundVaultExt.sol"; 
 import "./FinalizableCrowdsale.sol"; 
-import "./ReleasableToken.sol";
+import "./Tokens/ReleasableToken.sol";
 
 /**
  * @title RefundableCrowdsale
