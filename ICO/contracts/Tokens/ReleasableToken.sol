@@ -7,13 +7,12 @@
 pragma solidity ^0.4.21;
 
 import "./../ERC223/ERC223_Token.sol";
-import "./Recoverable.sol";
 
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
  */
-contract ReleasableToken is ERC223Token, Recoverable {
+contract ReleasableToken is ERC223Token, Ownable {
 
   /* The finalizer contract that allows unlift the transfer limits on this token */
   address public releaseAgent;
