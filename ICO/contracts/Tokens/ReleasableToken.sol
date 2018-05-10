@@ -6,6 +6,7 @@
 
 pragma solidity ^0.4.21;
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./../ERC223/ERC223_Token.sol";
 
 
