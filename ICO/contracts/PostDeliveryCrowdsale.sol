@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21; 
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol"; 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
 import "./TimedStagesCrowdsale.sol"; 
 
 /**
@@ -11,9 +11,19 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
     using SafeMath for uint256;
 
     mapping(address => uint256) public weiBalances;
+
     uint256 public weiRaised;
-    uint256 public tokensLeft;
+    
+    // all tokens which will be distributed among post delivery purchases
+    uint256 public tokensForDistribution;
+    
     bool once = true;
+
+    modifier onlyOnce() {
+        require(once);
+        once = false;
+        _;
+    }
 
     /**
      * @dev Withdraw tokens only after crowdsale ends.
@@ -34,19 +44,16 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
         require(investor != address(0));
 
         // get tokens left after closing crowdsale
-        getTokensLeftOnlyOnce();
+        getTokensForDistribution();
 
-        uint256 amount = (weiBalances[investor].mul(tokensLeft)).div(weiRaised);
+        uint256 amount = (weiBalances[investor].mul(tokensForDistribution)).div(weiRaised);
         require(amount > 0);
         weiBalances[investor] = 0;
         _tokenPurchase(investor, amount);
     }
 
-    function getTokensLeftOnlyOnce() internal {
-        if(once) {
-            tokensLeft = token.balanceOf(this);
-            once = false;
-        } 
+    function getTokensForDistribution() internal onlyOnce {
+        tokensForDistribution = token.balanceOf(this);
     }
 
     /**

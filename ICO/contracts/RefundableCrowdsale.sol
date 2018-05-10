@@ -1,8 +1,9 @@
 pragma solidity ^0.4.21; 
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol"; 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
 import "./utils/RefundVaultExt.sol"; 
 import "./FinalizableCrowdsale.sol"; 
+import "./ReleasableToken.sol";
 
 /**
  * @title RefundableCrowdsale
@@ -48,11 +49,11 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     function finalization(bool success) internal {
         if (success) {
             vault.close();
+            ReleasableToken(token).releaseTokenTransfer();
         } else {
             vault.enableRefunds();
         }
 
-        token.releaseTokenTransfer();
         super.finalization(success);
     }
 

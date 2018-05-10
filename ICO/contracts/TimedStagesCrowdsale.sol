@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "./Tokens/ReleasableToken.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./ERC223/ERC223_Interface.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 // ----------------------------------------------------------------------------
 // @title TimedStagesCrowdsale
@@ -22,7 +22,7 @@ contract TimedStagesCrowdsale is ContractReceiver {
     }
 
     // The token being sold
-    ReleasableToken public token; 
+    ERC223 public token; 
     
     // Address where funds are collected
     address public wallet;
@@ -47,12 +47,7 @@ contract TimedStagesCrowdsale is ContractReceiver {
         _;
     }
 
-    function TimedStagesCrowdsale (
-        address _wallet,
-        ReleasableToken _token
-    ) 
-        public
-    {
+    function TimedStagesCrowdsale (address _wallet, ERC223 _token) public {
         require(_wallet != address(0));
         require(_token != address(0));
 
@@ -64,9 +59,12 @@ contract TimedStagesCrowdsale is ContractReceiver {
     // Crowdsale external interface
     // -----------------------------------------
 
+    /*
+     * @dev For ERC223 callback
+     */
     function tokenFallback(address /*_from*/, uint /*_value*/, bytes /*_data*/) public {
         // accept only one type of ERC223 tokens
-        require(ReleasableToken(msg.sender) == token);
+        require(ERC223(msg.sender) == token);
     }
 
     function () external payable {
@@ -77,7 +75,9 @@ contract TimedStagesCrowdsale is ContractReceiver {
         uint256 amountInWei = msg.value;
         uint8 stageNumber = uint8(checkStage());
         require(amountInWei >= stages[stageNumber].minInvest);
+        require(amountInWei != 0);
 
+        // update state
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
         if (stages[stageNumber].stageType == StageType.PostDelivery) {
@@ -88,6 +88,7 @@ contract TimedStagesCrowdsale is ContractReceiver {
             _tokenPurchase(msg.sender, tokens);
             emit TokenPurchase(msg.sender, amountInWei, tokens);
         }
+
         _forwardFunds();
     }
 
@@ -121,5 +122,6 @@ contract TimedStagesCrowdsale is ContractReceiver {
     }
 
     function _postponedTokenPurchase(address /*investor*/, uint /*amount*/) internal {
+        // optional override
     }
 }
