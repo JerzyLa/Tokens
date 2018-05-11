@@ -1,5 +1,5 @@
-var MediarToken = artifacts.require("./MediarToken.sol");
-var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
+// var MediarToken = artifacts.require("./MediarToken.sol");
+// var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
 
 module.exports = function(deployer, network, accounts) {
 //    deployer.deploy(MediarToken).then(() => {
