@@ -30,10 +30,10 @@ contract CustomCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
         public
         TimedStagesCrowdsale(_wallet, _token)
     {
-        stages.push(Stage(4000, 500 finney, 1526342400, 1529020800, StageType.Standard));
-        stages.push(Stage(3000, 200 finney, 1529107200, 1531699200, StageType.Standard));
-        stages.push(Stage(2500, 200 finney, 1524687000, 1524687000, StageType.Standard));
-        stages.push(Stage(2000, 200 finney, 1524687000, 1524687000, StageType.Standard));
-        stages.push(Stage(0, 200 finney, 1524687000, 1524687000, StageType.PostDelivery));
+        stages.push(Stage(4000, 500 finney, 1526050200, 1526053200, StageType.Standard));
+        stages.push(Stage(3000, 200 finney, 1526056200, 1526059200, StageType.Standard));
+        stages.push(Stage(2500, 200 finney, 1526062200, 1526065200, StageType.Standard));
+        stages.push(Stage(2000, 200 finney, 1526068200, 1526071200, StageType.Standard));
+        stages.push(Stage(0, 200 finney, 1526074200, 1526077200, StageType.PostDelivery));
     }
 }
