@@ -1,16 +1,29 @@
-// var MediarToken = artifacts.require("./MediarToken.sol");
+ var CustomToken = artifacts.require("./CustomToken.sol");
  var CustomCrowdsale = artifacts.require("./CustomCrowdsale.sol");
 
-module.exports = function(deployer) {
-    deployer.deploy(CustomCrowdsale, "0xc76844F091888e059a2cE74B5A7Ffd386F9187e1", "0x1719d20c8eDa2Ec1e878708CeD69e5D322e8423c");
+// deploy only for ganache-cli & rinkeby
+module.exports = function(deployer, network, accounts) {
+   let token;
+   let owner = accounts[0]; 
 
-//    deployer.deploy(MediarToken).then(() => {
-//        return deployer.deploy(MediarCrowdsale, accounts[0], MediarToken.address, 100000000000000000, 
-//         4000, 1524560400, 1524571200, 
-//         3000, 1524574800, 1524585600, 
-//         2000, 1524589200, 1524600000,
-//         1524603600, 1524686400);
-//    });
+   if(network == "rinkeby") {
+       owner = "0xc76844F091888e059a2cE74B5A7Ffd386F9187e1";
+   }
 
-   // TODO: dodać przsył tokenow
+   deployer.deploy(CustomToken).then(() => {
+       return deployer.deploy(CustomCrowdsale, owner, CustomToken.address);
+   }).then(() => {
+       return CustomToken.deployed();
+   }).then((instance) => {
+       token = instance;
+       return token.setTransferAgent(owner, true);
+   }).then(() => {
+       return token.setTransferAgent(CustomCrowdsale.address, true);
+   }).then(() => {
+       return token.setReleaseAgent(CustomCrowdsale.address);
+   }).then(() => {
+       return token.transfer(CustomCrowdsale.address, 210000000000000000000000000);
+   });
 };
+
+// TODO: deploy to main net
