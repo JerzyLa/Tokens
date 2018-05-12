@@ -12,6 +12,7 @@ module.exports = {
     rinkeby: {
       host: "localhost", // Connect to geth on the specified
       port: 8545,
+      from: "0xc76844F091888e059a2cE74B5A7Ffd386F9187e1",
       network_id: 4,
       gas: 6000000 // Gas limit used for deploys
     }
