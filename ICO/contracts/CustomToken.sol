@@ -10,6 +10,6 @@ contract CustomToken is AMLToken {
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
     function CustomToken() public 
-        AMLToken("Custom", "CTM", INITIAL_SUPPLY, 18) {
+        AMLToken("Mediar", "MDR", INITIAL_SUPPLY, 18) {
     }
 }

@@ -4,10 +4,16 @@
 // deploy only for ganache-cli & rinkeby
 module.exports = function(deployer, network, accounts) {
    let token;
-   let owner = accounts[0]; 
+   let owner;
 
-   if(network == "rinkeby") {
+   if(network == "development") {
+      owner = accounts[0];
+   }
+   else if(network == "rinkeby") {
        owner = "0xc76844F091888e059a2cE74B5A7Ffd386F9187e1";
+   }
+   else if(network == "live") {
+       // TODO add owner address owner =
    }
 
    deployer.deploy(CustomToken).then(() => {
