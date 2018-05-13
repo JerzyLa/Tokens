@@ -5,19 +5,23 @@
 module.exports = function(deployer, network, accounts) {
    let token;
    let owner;
+   let wallet;
 
-   if(network == "development") {
+   if(network == "development" || network == "rinkeby") {
       owner = accounts[0];
+      wallet = accounts[1];
    }
-   else if(network == "rinkeby") {
-       owner = "0xc76844F091888e059a2cE74B5A7Ffd386F9187e1";
+   else if(network == "live") {
+       // TODO: fill for live network
+       // owner = 
+       // wallet =
    }
    else if(network == "live") {
        // TODO add owner address owner =
    }
 
    deployer.deploy(CustomToken).then(() => {
-       return deployer.deploy(CustomCrowdsale, owner, CustomToken.address);
+       return deployer.deploy(CustomCrowdsale, wallet, CustomToken.address);
    }).then(() => {
        return CustomToken.deployed();
    }).then((instance) => {
