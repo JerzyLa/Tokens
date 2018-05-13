@@ -1,5 +1,5 @@
- var CustomToken = artifacts.require("./CustomToken.sol");
- var CustomCrowdsale = artifacts.require("./CustomCrowdsale.sol");
+ var MediarToken = artifacts.require("./MediarToken.sol");
+ var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
 
 // deploy only for ganache-cli & rinkeby
 module.exports = function(deployer, network, accounts) {
@@ -20,19 +20,19 @@ module.exports = function(deployer, network, accounts) {
        // TODO add owner address owner =
    }
 
-   deployer.deploy(CustomToken).then(() => {
-       return deployer.deploy(CustomCrowdsale, wallet, CustomToken.address);
+   deployer.deploy(MediarToken).then(() => {
+       return deployer.deploy(MediarCrowdsale, wallet, MediarToken.address);
    }).then(() => {
-       return CustomToken.deployed();
+       return MediarToken.deployed();
    }).then((instance) => {
        token = instance;
        return token.setTransferAgent(owner, true);
    }).then(() => {
-       return token.setTransferAgent(CustomCrowdsale.address, true);
+       return token.setTransferAgent(MediarCrowdsale.address, true);
    }).then(() => {
-       return token.setReleaseAgent(CustomCrowdsale.address);
+       return token.setReleaseAgent(MediarCrowdsale.address);
    }).then(() => {
-       return token.transfer(CustomCrowdsale.address, 210000000000000000000000000);
+       return token.transfer(MediarCrowdsale.address, 210000000000000000000000000);
    });
 };
 
