@@ -14,14 +14,14 @@ import "./Tokens/ReleasableToken.sol";
 contract RefundableCrowdsale is FinalizableCrowdsale {
     using SafeMath for uint256;
 
-    // refund vault used to hold funds while crowdsale is running
+    // refund vault used to hold funds for refunding while crowdsale is running
     RefundVaultExt public vault;
 
     /**
      * @dev Constructor, creates RefundVault.
      */
     function RefundableCrowdsale() public {
-        vault = new RefundVaultExt(wallet);
+        vault = new RefundVaultExt();
     }
 
     /**
@@ -45,6 +45,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
 
     /**
      * @dev vault finalization task, called when owner calls finalize()
+     * when successful release token and disable refunding.
      */
     function finalization(bool isSuccessful) internal {
         if (isSuccessful) {

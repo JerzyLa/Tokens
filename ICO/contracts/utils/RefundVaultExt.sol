@@ -11,7 +11,6 @@ contract RefundVaultExt is Ownable
 
     /* How much wei every investor deposited */
     mapping (address => uint256) public deposited;
-    address public wallet;
     State public state;
     
     /* How much wei we have returned back to the contract after a failed crowdfund. */
@@ -21,12 +20,7 @@ contract RefundVaultExt is Ownable
     event RefundsEnabled();
     event Refunded(address indexed beneficiary, uint256 weiAmount);
 
-    /**
-    * @param _wallet Vault address
-    */
-    function RefundVaultExt(address _wallet) public {
-        require(_wallet != address(0));
-        wallet = _wallet;
+    function RefundVaultExt() public {
         state = State.Active;
     }
 
