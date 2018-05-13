@@ -12,7 +12,7 @@ const should = require('chai')
   .should();
 
 const CustomCrowdsaleImpl = artifacts.require('CustomCrowdsaleImpl');
-const CustomToken = artifacts.require('CustomToken');
+const MediarToken = artifacts.require('MediarToken');
 
 contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
   const rate1 = new BigNumber(100000000);
@@ -34,7 +34,7 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
     this.beforeEndTime = this.closingTimeLast - duration.hours(1);
     this.afterClosingTime = this.closingTimeLast + duration.seconds(1);
     
-    this.token = await CustomToken.new({ from: owner });
+    this.token = await MediarToken.new({ from: owner });
     this.crowdsale = await CustomCrowdsaleImpl.new(wallet, this.token.address,
       rate1, minInvest1, this.openingTime1, this.closingTime1,
       minInvest2, this.openingTimeLast, this.closingTimeLast,
@@ -45,6 +45,14 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
     await this.token.setTransferAgent(this.crowdsale.address, true, { from: owner });
     await this.token.setReleaseAgent(this.crowdsale.address, { from: owner });
     await this.token.transfer(this.crowdsale.address, tokenSupply, { from: owner });
+  });
+
+  it('should always forward funds to wallet ', async function () {
+    await increaseTimeTo(this.openingTimeLast);
+    const pre = web3.eth.getBalance(wallet);
+    await this.crowdsale.sendTransaction({ value: value, from: investor });
+    const post = web3.eth.getBalance(wallet);
+    post.minus(pre).should.be.bignumber.equal(value);
   });
 
   describe('Crowdsale finalization', function () {
@@ -153,12 +161,25 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
       await this.crowdsale.finalize(true, { from: owner });
       await this.crowdsale.claimRefund({ from: investor }).should.be.rejectedWith(EVMRevert);
     });
+
+    it('should allow to load refund if not finalized unsuccesfully', async function () {
+      await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.finalize(true, { from: owner });
+      await this.crowdsale.loadRefund({ value: value, from: owner });
+    });
+
+    it('should allow to load refund after end if finalized unsuccesfully', async function () {
+      await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.finalize(false, { from: owner });
+      await this.crowdsale.loadRefund({ value: value, from: owner });
+    });
   
     it('should allow refunds after end if finalized unsuccesfully', async function () {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.sendTransaction({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
       await this.crowdsale.finalize(false, { from: owner });
+      await this.crowdsale.loadRefund({ value: value, from: owner });
       const pre = web3.eth.getBalance(investor);
       await this.crowdsale.claimRefund({ from: investor, gasPrice: 0 })
         .should.be.fulfilled;
@@ -166,20 +187,22 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
       post.minus(pre).should.be.bignumber.equal(value);
     });
 
-    it('should allow owner to alwayes refund for investor (before end case)', async function () {
+    it('should allow owner to always refund for investor (before end case)', async function () {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.sendTransaction({ value: value, from: investor });
       const pre = web3.eth.getBalance(investor);
+      await this.crowdsale.loadRefund({ value: value, from: owner });
       await this.crowdsale.claimRefundForInvestor(investor, { from: owner, gasPrice: 0 })
         .should.be.fulfilled;
       const post = web3.eth.getBalance(investor);
       post.minus(pre).should.be.bignumber.equal(value);
     });
 
-    it('should allow owner to  alwayes refund for investor (after end case)', async function () {
+    it('should allow owner to always refund for investor (after end case)', async function () {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.sendTransaction({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.loadRefund({ value: value, from: owner });
       await this.crowdsale.finalize(false, { from: owner });
       const pre = web3.eth.getBalance(investor);
       await this.crowdsale.claimRefundForInvestor(investor, { from: owner, gasPrice: 0 })
@@ -187,15 +210,33 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
       const post = web3.eth.getBalance(investor);
       post.minus(pre).should.be.bignumber.equal(value);
     });
-  
-    it('should forward funds to wallet after end  finalized succesfully', async function () {
-      await increaseTimeTo(this.openingTimeLast);
-      await this.crowdsale.sendTransaction({ value: value, from: investor });
+  });
+
+  describe('KYC', function() {
+    it('should allow only owner to transfer tokens back during ICO', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.buyTokens({ value: value, from: investor });
+      await this.token.transferToOwner(investor, {from: owner});
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(0);
+    });
+
+    it('should allow only owner to transfer tokens back after unsuccessful finalization', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.buyTokens({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
-      const pre = web3.eth.getBalance(wallet);
+      await this.crowdsale.finalize(false, { from: owner });
+      await this.token.transferToOwner(investor, {from: owner});
+      const balance = await this.token.balanceOf(investor);
+      balance.should.be.bignumber.equal(0);
+    });
+
+    it('should deny to transfer tokens back to owner after successful finalization', async function () {
+      await increaseTimeTo(this.openingTime1);
+      await this.crowdsale.buyTokens({ value: value, from: investor });
+      await increaseTimeTo(this.afterClosingTime);
       await this.crowdsale.finalize(true, { from: owner });
-      const post = web3.eth.getBalance(wallet);
-      post.minus(pre).should.be.bignumber.equal(value);
+      await this.token.transferToOwner(investor, {from: owner}).should.be.rejectedWith(EVMRevert);
     });
   });
 });

@@ -14,19 +14,19 @@ contract FinalizableCrowdsale is TimedStagesCrowdsale, Ownable {
 
     bool public isFinalized = false;
 
-    event Finalized();
+    event Finalized(bool isSuccessful);
 
     /**
      * @dev Must be called after crowdsale ends, to do some extra finalization
      * work. Calls the contract's finalization function.
      * Sends as parameter crowdsale result
      */
-    function finalize(bool success) onlyOwner public {
+    function finalize(bool isSuccessful) onlyOwner public {
         require(!isFinalized);
         require(hasClosed());
 
-        finalization(success);
-        emit Finalized();
+        finalization(isSuccessful);
+        emit Finalized(isSuccessful);
 
         isFinalized = true;
     }

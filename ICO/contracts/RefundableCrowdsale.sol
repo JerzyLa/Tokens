@@ -46,21 +46,31 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     /**
      * @dev vault finalization task, called when owner calls finalize()
      */
-    function finalization(bool success) internal {
-        if (success) {
+    function finalization(bool isSuccessful) internal {
+        if (isSuccessful) {
             vault.close();
             ReleasableToken(token).releaseTokenTransfer();
         } else {
             vault.enableRefunds();
         }
 
-        super.finalization(success);
+        super.finalization(isSuccessful);
+    }
+
+    /**
+     * Allow load refunds back on the contract for the refunding.
+     *
+     * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached..
+     */
+    function loadRefund() public payable {
+        vault.loadRefund.value(msg.value)();
     }
 
     /**
     * @dev Overrides Crowdsale fund forwarding, sending funds to vault.
     */
     function _forwardFunds() internal {
-        vault.deposit.value(msg.value)(msg.sender);
+        vault.deposit(msg.sender, msg.value);
+        wallet.transfer(msg.value);
     }
 }
