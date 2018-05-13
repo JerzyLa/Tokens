@@ -1,7 +1,6 @@
  var MediarToken = artifacts.require("./MediarToken.sol");
  var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
 
-// deploy only for ganache-cli & rinkeby
 module.exports = function(deployer, network, accounts) {
    let token;
    let owner;
@@ -15,9 +14,6 @@ module.exports = function(deployer, network, accounts) {
        // TODO: fill for live network
        // owner = 
        // wallet =
-   }
-   else if(network == "live") {
-       // TODO add owner address owner =
    }
 
    deployer.deploy(MediarToken).then(() => {
@@ -35,5 +31,3 @@ module.exports = function(deployer, network, accounts) {
        return token.transfer(MediarCrowdsale.address, 210000000000000000000000000);
    });
 };
-
-// TODO: deploy to main net
