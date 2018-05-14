@@ -5,16 +5,16 @@ import "./PostDeliveryCrowdsale.sol";
 
 // ----------------------------------------------------------------------------
 // @title MediarCrowdsale
-// @dev Crowdsale contract is used for selling ERC223 tokens for setup price.
-// Below points describes rules for distributing tokens by this contract.
+// @dev Crowdsale contract is used for selling ERC223 tokens.
+// Below points describes rules for tokens distribution by this contract.
 //      1. Sale is only available during certain period of time called stage.
-//         There will be only 5 stages during ICO.
+//         There will be 5 stages during ICO.
 //      2. Price for single token will be constant during standard stage. Every next stage 
 //         will start with higher price for token.
 //      3. At the end of final stage all unsold tokens will be distributed among
 //         token buers in that stage. Addresses which purchased more tokens 
 //         would receive proportionally more unsold tokens. 
-//      4. After final stage, wont be possible to buy more tokens. 
+//      4. After final stage, won't be possible to buy more tokens. 
 //         Payable functions will be disabled.
 //      5. Refunding when goal not reached 
 //      6. AML token support

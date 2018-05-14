@@ -123,6 +123,6 @@ contract TimedStagesCrowdsale is ContractReceiver {
     }
 
     function _postponedTokenPurchase(address /*investor*/, uint /*amount*/) internal {
-        // optional override
+        // shall be overriden with post delivery implementation
     }
 }

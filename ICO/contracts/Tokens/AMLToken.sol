@@ -12,7 +12,7 @@ import "./ReleasableToken.sol";
 /**
  * The AML Token
  *
- * This subset of BurnableCrowdsaleToken gives the Owner a possibility to
+ * This subset of ReleasableToken gives the Owner a possibility to
  * reclaim tokens from a participant before the token is released
  * after a participant has failed a prolonged AML process.
  *
