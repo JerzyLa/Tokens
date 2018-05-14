@@ -12,7 +12,7 @@ module.exports = function(deployer, network, accounts) {
    }
    else if(network == "live") {
        // TODO: fill for live network
-       // owner = 
+       owner = accounts[0]; 
        // wallet =
    }
 
