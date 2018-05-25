@@ -6,9 +6,13 @@ module.exports = function(deployer, network, accounts) {
    let owner;
    let wallet;
 
-   if(network == "development" || network == "rinkeby") {
+   if(network == "development") {
       owner = accounts[0];
       wallet = accounts[1];
+   }
+   if(network == "rinkeby") {
+      owner = accounts[0];
+      wallet = "0x70276Be6bEcF1D24670BDA1F139B30e271ADAAA2";
    }
    else if(network == "live") {
        // TODO: fill for live network
