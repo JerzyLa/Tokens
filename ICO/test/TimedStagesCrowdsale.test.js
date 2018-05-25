@@ -131,14 +131,6 @@ contract('TimedStagesCrowdsaleImpl', function ([_, owner, investor, wallet]) {
       event.args.amountOfTokens.should.be.bignumber.equal(expectedTokenAmount1);
     });
 
-    it('should log postponed purchase when last phase', async function () {
-      await increaseTimeTo(this.openingTimeLast);
-      const { logs } = await this.crowdsale.buyTokens({ value: value, from: investor });
-      const event = logs.find(e => e.event === 'PostponedTokenPurchase');
-      event.args.investor.should.equal(investor);
-      event.args.value.should.be.bignumber.equal(value);
-    });
-
     it('should assign tokens to beneficiary in stage1', async function () {
       await increaseTimeTo(this.openingTime1);
       await this.crowdsale.buyTokens({ value, from: investor });

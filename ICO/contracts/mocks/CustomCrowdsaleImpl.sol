@@ -5,7 +5,7 @@ import "../RefundableCrowdsale.sol";
 
 
 contract CustomCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
-    function CustomCrowdsaleImpl (
+    constructor(
         address _wallet,
         ReleasableToken _token,
         uint256 _rate1,
@@ -19,7 +19,7 @@ contract CustomCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
         public
         TimedStagesCrowdsale(_wallet, _token)
     {
-        stages.push(Stage(_rate1, _minInvest1, _openingTime1, _closingTime1, StageType.Standard));
-        stages.push(Stage(0, _minInvest2, _openingTime2, _closingTime2, StageType.PostDelivery));
+        stages.push(Stage(_rate1, _minInvest1, _openingTime1, _closingTime1));
+        stages.push(Stage(0, _minInvest2, _openingTime2, _closingTime2));
     }
 }

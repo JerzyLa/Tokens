@@ -11,15 +11,12 @@ import "./ERC223/Receiver_Interface.sol";
 contract TimedStagesCrowdsale is ContractReceiver {
     using SafeMath for uint256;
 
-    enum StageType { Standard, PostDelivery }
-
     struct Stage {
         // How meny token units a buyer gets per ether
         uint256 rate;
         uint256 minInvest;
         uint256 openingTime;
         uint256 closingTime;
-        StageType stageType;
     }
 
     // The token being sold
@@ -41,14 +38,13 @@ contract TimedStagesCrowdsale is ContractReceiver {
     * @param amountOfTokens amount of tokens purchased
    */
     event TokenPurchase(address indexed investor, uint256 value, uint256 amountOfTokens);
-    event PostponedTokenPurchase(address indexed investor, uint256 value);
 
     modifier onlyWhileOpen() {
         require(checkStage() >= 0);
         _;
     }
 
-    function TimedStagesCrowdsale (address _wallet, ERC223 _token) public {
+    constructor(address _wallet, ERC223 _token) public {
         require(_wallet != address(0));
         require(_token != address(0));
 
@@ -81,14 +77,10 @@ contract TimedStagesCrowdsale is ContractReceiver {
         // update state
         collectedAmountInWei = collectedAmountInWei.add(amountInWei);
 
-        if (stages[stageNumber].stageType == StageType.PostDelivery) {
-            _postponedTokenPurchase(msg.sender, amountInWei);
-            emit PostponedTokenPurchase(msg.sender, amountInWei);
-        } else {
-            uint256 tokens = amountInWei.mul(stages[stageNumber].rate); 
-            _tokenPurchase(msg.sender, tokens);
-            emit TokenPurchase(msg.sender, amountInWei, tokens);
-        }
+        uint256 tokens = amountInWei.mul(stages[stageNumber].rate);
+        _tokenPurchase(msg.sender, tokens);
+        _postponedTokenPurchase(msg.sender, amountInWei);
+        emit TokenPurchase(msg.sender, amountInWei, tokens);
 
         _forwardFunds();
     }

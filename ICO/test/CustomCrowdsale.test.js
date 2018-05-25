@@ -123,19 +123,18 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
       balance.should.be.bignumber.equal(tokenSupply);
     });
 
-    it('should spread the amount of tokens left to all purchases in last stage', async function () {
+    it('should spread the amount of tokens left to all purchases in whole ICO', async function () {
       await increaseTimeTo(this.openingTime1);
-      await this.crowdsale.buyTokens({ value: value, from: investor });
+      await this.crowdsale.buyTokens({ value: value, from: investor1 });
 
       await increaseTimeTo(this.openingTimeLast);
-      await this.crowdsale.buyTokens({ value: value, from: investor1 });
       await this.crowdsale.buyTokens({ value: value.mul(2), from: investor2 });
       await this.crowdsale.buyTokens({ value: value.mul(3), from: investor3 });
       await increaseTimeTo(this.afterClosingTime);
       
       await this.crowdsale.withdrawTokens({ from: investor1 });
       let balance = await this.token.balanceOf(investor1);
-      balance.should.be.bignumber.equal('1.6666666666666666666666666e25');
+      balance.should.be.bignumber.equal('1.16666666666666666666666666e26');
       
       await this.crowdsale.withdrawTokens({ from: investor2 });
       balance = await this.token.balanceOf(investor2);

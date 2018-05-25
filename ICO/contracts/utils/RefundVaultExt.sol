@@ -20,7 +20,7 @@ contract RefundVaultExt is Ownable
     event RefundsEnabled();
     event Refunded(address indexed beneficiary, uint256 weiAmount);
 
-    function RefundVaultExt() public {
+    constructor() public {
         state = State.Active;
     }
 
