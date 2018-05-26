@@ -1,4 +1,4 @@
-pragma solidity ^0.4.9;
+pragma solidity ^0.4.21;
 
 import "./Receiver_Interface.sol";
 import "./ERC223_Interface.sol";
@@ -23,19 +23,19 @@ contract ERC223Token is ERC223 {
   
   // Function to access name of token .
   function name() public view returns (string _name) {
-      return name;
+    return name;
   }
   // Function to access symbol of token .
   function symbol() public view returns (string _symbol) {
-      return symbol;
+    return symbol;
   }
   // Function to access decimals of token .
   function decimals() public view returns (uint256 _decimals) {
-      return decimals;
+    return decimals;
   }
   // Function to access total supply of tokens .
   function totalSupply() public view returns (uint256 _totalSupply) {
-      return totalSupply;
+    return totalSupply;
   }
   
   
@@ -43,15 +43,15 @@ contract ERC223Token is ERC223 {
   function transfer(address _to, uint _value, bytes _data, string _custom_fallback) public returns (bool success) {
       
     if(isContract(_to)) {
-        if (balanceOf(msg.sender) < _value) revert();
-        balances[msg.sender] = balanceOf(msg.sender).sub(_value);
-        balances[_to] = balanceOf(_to).add(_value);
-        assert(_to.call.value(0)(bytes4(keccak256(_custom_fallback)), msg.sender, _value, _data));
-        emit Transfer(msg.sender, _to, _value, _data);
-        return true;
+      if (balanceOf(msg.sender) < _value) revert();
+      balances[msg.sender] = balanceOf(msg.sender).sub(_value);
+      balances[_to] = balanceOf(_to).add(_value);
+      assert(_to.call.value(0)(bytes4(keccak256(_custom_fallback)), msg.sender, _value, _data));
+      emit Transfer(msg.sender, _to, _value, _data);
+      return true;
     }
     else {
-        return transferToAddress(_to, _value, _data);
+      return transferToAddress(_to, _value, _data);
     }
 }
   
@@ -60,12 +60,12 @@ contract ERC223Token is ERC223 {
   function transfer(address _to, uint _value, bytes _data) public returns (bool success) {
       
     if(isContract(_to)) {
-        return transferToContract(_to, _value, _data);
+      return transferToContract(_to, _value, _data);
     }
     else {
-        return transferToAddress(_to, _value, _data);
+      return transferToAddress(_to, _value, _data);
     }
-}
+  }
   
   // Standard function transfer similar to ERC20 transfer with no _data .
   // Added due to backwards compatibility reasons .
@@ -75,22 +75,22 @@ contract ERC223Token is ERC223 {
     //added due to backwards compatibility reasons
     bytes memory empty;
     if(isContract(_to)) {
-        return transferToContract(_to, _value, empty);
+      return transferToContract(_to, _value, empty);
     }
     else {
         return transferToAddress(_to, _value, empty);
     }
-}
+  }
 
   //assemble the given address bytecode. If bytecode exists then the _addr is a contract.
   function isContract(address _addr) private view returns (bool is_contract) {
-      uint length;
-      assembly {
-            //retrieve the size of the code on target address, this needs assembly
-            length := extcodesize(_addr)
-      }
-      return (length>0);
+    uint length;
+    assembly {
+      //retrieve the size of the code on target address, this needs assembly
+      length := extcodesize(_addr)
     }
+    return (length>0);
+  }
 
   //function that is called when transaction target is an address
   function transferToAddress(address _to, uint _value, bytes _data) private returns (bool success) {

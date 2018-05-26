@@ -25,9 +25,9 @@ contract ReleasableToken is ERC223Token, Ownable {
   mapping (address => bool) public transferAgents;
 
   /**
-   * Limit token transfer until the crowdsale is over.
-   *
-   */
+  * Limit token transfer until the crowdsale is over.
+  *
+  */
   modifier canTransfer(address _sender) {
 
     if(!released) {
@@ -38,10 +38,10 @@ contract ReleasableToken is ERC223Token, Ownable {
   }
 
   /**
-   * Set the contract that can call release and make the token transferable.
-   *
-   * Design choice. Allow reset the release agent to fix fat finger mistakes.
-   */
+  * Set the contract that can call release and make the token transferable.
+  *
+  * Design choice. Allow reset the release agent to fix fat finger mistakes.
+  */
   function setReleaseAgent(address addr) onlyOwner inReleaseState(false) public {
 
     // We don't do interface check here as we might want to a normal wallet address to act as a release agent
@@ -49,17 +49,17 @@ contract ReleasableToken is ERC223Token, Ownable {
   }
 
   /**
-   * Owner can allow a particular address (a crowdsale contract) to transfer tokens despite the lock up period.
-   */
+  * Owner can allow a particular address (a crowdsale contract) to transfer tokens despite the lock up period.
+  */
   function setTransferAgent(address addr, bool state) onlyOwner inReleaseState(false) public {
     transferAgents[addr] = state;
   }
 
   /**
-   * One way function to release the tokens to the wild.
-   *
-   * Can be called only from the release agent that is the final ICO contract. It is only called if the crowdsale has been success (first milestone reached).
-   */
+  * One way function to release the tokens to the wild.
+  *
+  * Can be called only from the release agent that is the final ICO contract. It is only called if the crowdsale has been success (first milestone reached).
+  */
   function releaseTokenTransfer() public onlyReleaseAgent {
     released = true;
   }
@@ -78,12 +78,12 @@ contract ReleasableToken is ERC223Token, Ownable {
 
   function transfer(address _to, uint _value) public canTransfer(msg.sender) returns (bool success) {
     // Call StandardToken.transfer()
-   return super.transfer(_to, _value);
+    return super.transfer(_to, _value);
   }
 
   function transfer(address _to, uint _value, bytes _data) public canTransfer(msg.sender) returns (bool success) {
     // Call StandardToken.transfer()
-   return super.transfer(_to, _value, _data);
+    return super.transfer(_to, _value, _data);
   }
 
   function transfer(address _to, uint _value, bytes _data, string _custom_fallback) public canTransfer(msg.sender) returns (bool success) {

@@ -10,33 +10,33 @@ import "./TimedStagesCrowdsale.sol";
  * after finishing.
  */
 contract FinalizableCrowdsale is TimedStagesCrowdsale, Ownable {
-    using SafeMath for uint256;
+  using SafeMath for uint256;
 
-    bool public isFinalized = false;
+  bool public isFinalized = false;
 
-    event Finalized(bool isSuccessful);
+  event Finalized(bool isSuccessful);
 
-    /**
-     * @dev Must be called after crowdsale ends, to do some extra finalization
-     * work. Calls the contract's finalization function.
-     * Sends as parameter crowdsale result
-     */
-    function finalize(bool isSuccessful) onlyOwner public {
-        require(!isFinalized);
-        require(hasClosed());
+  /**
+    * @dev Must be called after crowdsale ends, to do some extra finalization
+    * work. Calls the contract's finalization function.
+    * Sends as parameter crowdsale result
+    */
+  function finalize(bool isSuccessful) onlyOwner public {
+    require(!isFinalized);
+    require(hasClosed());
 
-        finalization(isSuccessful);
-        emit Finalized(isSuccessful);
+    finalization(isSuccessful);
+    emit Finalized(isSuccessful);
 
-        isFinalized = true;
-    }
+    isFinalized = true;
+  }
 
-    /**
-     * @dev Can be overridden to add finalization logic. The overriding function
-     * should call super.finalization() to ensure the chain of finalization is
-     * executed entirely.
-     */
-    function finalization(bool) internal {
-    }
+  /**
+    * @dev Can be overridden to add finalization logic. The overriding function
+    * should call super.finalization() to ensure the chain of finalization is
+    * executed entirely.
+    */
+  function finalization(bool) internal {
+  }
 
 }

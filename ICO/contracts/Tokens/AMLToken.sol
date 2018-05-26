@@ -28,7 +28,7 @@ contract AMLToken is ReleasableToken {
   // An event when the owner has reclaimed non-released tokens
   event OwnerReclaim(address fromWhom, uint amount);
 
-  function AMLToken(string _name, string _symbol, uint _initialSupply, uint _decimals) public {
+  constructor(string _name, string _symbol, uint _initialSupply, uint _decimals) public {
     owner = msg.sender;
     name = _name;
     symbol = _symbol;
