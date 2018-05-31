@@ -15,9 +15,8 @@ module.exports = function(deployer, network, accounts) {
       wallet = "0x70276Be6bEcF1D24670BDA1F139B30e271ADAAA2";
    }
    else if(network == "live") {
-       // TODO: fill for live network
        owner = accounts[0]; 
-       // wallet =
+       wallet = "0xfac4a6886ce86acefee83f6b56bf7dc39ef14d23";
    }
 
    deployer.deploy(MediarToken).then(() => {

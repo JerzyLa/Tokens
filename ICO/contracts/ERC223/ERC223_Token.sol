@@ -19,6 +19,11 @@ contract ERC223Token is ERC223 {
   string public symbol;
   uint256 public decimals;
   uint256 public totalSupply;
+
+  modifier validDestination( address to ) {
+    require(to != address(0x0));
+    _;
+  }
   
   
   // Function to access name of token .
@@ -40,7 +45,7 @@ contract ERC223Token is ERC223 {
   
   
   // Function that is called when a user or another contract wants to transfer funds .
-  function transfer(address _to, uint _value, bytes _data, string _custom_fallback) public returns (bool success) {
+  function transfer(address _to, uint _value, bytes _data, string _custom_fallback) validDestination(_to) public returns (bool success) {
       
     if(isContract(_to)) {
       if (balanceOf(msg.sender) < _value) revert();
@@ -57,7 +62,7 @@ contract ERC223Token is ERC223 {
   
 
   // Function that is called when a user or another contract wants to transfer funds .
-  function transfer(address _to, uint _value, bytes _data) public returns (bool success) {
+  function transfer(address _to, uint _value, bytes _data) validDestination(_to) public returns (bool success) {
       
     if(isContract(_to)) {
       return transferToContract(_to, _value, _data);
@@ -69,7 +74,7 @@ contract ERC223Token is ERC223 {
   
   // Standard function transfer similar to ERC20 transfer with no _data .
   // Added due to backwards compatibility reasons .
-  function transfer(address _to, uint _value) public returns (bool success) {
+  function transfer(address _to, uint _value) validDestination(_to) public returns (bool success) {
       
     //standard function transfer similar to ERC20 transfer with no _data
     //added due to backwards compatibility reasons
