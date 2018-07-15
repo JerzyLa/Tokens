@@ -19,6 +19,15 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
   
   bool once = true;
 
+  constructor() public {
+    totalShares = PostDeliveryCrowdsale(oldCrowdsale).totalShares();
+
+    for(uint i=0; i<investors.length; ++i) {
+      address investor = investors[i];
+      shares[investor].add(PostDeliveryCrowdsale(oldCrowdsale).shares(investor));
+    }
+  }
+
   /**
     * @dev Withdraw tokens only after crowdsale ends.
     */

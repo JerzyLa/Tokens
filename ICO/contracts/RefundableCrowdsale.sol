@@ -21,7 +21,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     * @dev Constructor, creates RefundVault.
     */
   constructor() public {
-    vault = new RefundVaultExt();
+    vault = RefundableCrowdsale(oldCrowdsale).vault(); // TODO: check that
   }
 
   /**

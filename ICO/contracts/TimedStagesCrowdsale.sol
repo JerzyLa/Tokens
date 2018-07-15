@@ -31,6 +31,10 @@ contract TimedStagesCrowdsale is ContractReceiver {
   // Crowdsale stages
   Stage[] public stages;
 
+  address[] public investors;
+
+  address public oldCrowdsale;
+
   /**
   * Event for token purchase logging
   * @param investor who bought tokens
@@ -44,12 +48,15 @@ contract TimedStagesCrowdsale is ContractReceiver {
     _;
   }
 
-  constructor(address _wallet, ERC223 _token) public {
-    require(_wallet != address(0));
-    require(_token != address(0));
+  constructor(address _oldCrowdsale) public {
+    require(_oldCrowdsale != address(0));
 
-    wallet = _wallet;
-    token = _token;
+    oldCrowdsale = _oldCrowdsale;
+    wallet = TimedStagesCrowdsale(oldCrowdsale).wallet();
+    token = TimedStagesCrowdsale(oldCrowdsale).token();
+    collectedAmountInWei = TimedStagesCrowdsale(oldCrowdsale).collectedAmountInWei();
+
+    investors.push(0x0);  // TODO: find better initilaization way
   }
 
   // -----------------------------------------

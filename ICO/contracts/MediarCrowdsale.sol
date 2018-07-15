@@ -23,11 +23,10 @@ contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
   using SafeMath for uint256;
 
   constructor(
-    address _wallet,
-    ReleasableToken _token
+    address oldCrowdsale
   ) 
     public
-    TimedStagesCrowdsale(_wallet, _token)
+    TimedStagesCrowdsale(oldCrowdsale)
   {
     stages.push(Stage(4000, 500 finney, 1527811200, 1529020800));
     stages.push(Stage(3000, 200 finney, 1529107200, 1531699200));
