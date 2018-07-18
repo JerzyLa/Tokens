@@ -56,7 +56,7 @@ contract TimedStagesCrowdsale is ContractReceiver {
     token = TimedStagesCrowdsale(oldCrowdsale).token();
     collectedAmountInWei = TimedStagesCrowdsale(oldCrowdsale).collectedAmountInWei();
 
-    investors.push(0x0);  // TODO: find better initilaization way
+    investors.push(0x0);  // TODO: find better initilaization way, update investors
   }
 
   // -----------------------------------------
