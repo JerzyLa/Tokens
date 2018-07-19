@@ -9,11 +9,11 @@ contract RefundVaultExt is Ownable
 
   enum State { Active, Refunding, Closed }
 
-  /* How much wei every investor deposited */
+  // How much wei every investor deposited 
   mapping (address => uint256) public deposited;
   State public state;
 
-  /* How much wei we have returned back to the contract after a failed crowdfund. */
+  // How much wei we have returned back to the contract after a failed crowdfund. 
   uint256 public loadedRefund = 0;
 
   event Closed();
@@ -25,8 +25,8 @@ contract RefundVaultExt is Ownable
   }
 
   /**
-  * @param investor Investor address
-  */
+    * @param investor Investor address
+    */
   function deposit(address investor, uint weiAmount) onlyOwner public {
     require(state == State.Active);
     deposited[investor] = deposited[investor].add(weiAmount);
@@ -45,8 +45,8 @@ contract RefundVaultExt is Ownable
   }
 
   /**
-  * @param investor Investor address
-  */
+    * @param investor Investor address
+    */
   function refund(address investor) public {
     require(state == State.Refunding);
     uint256 depositedValue = deposited[investor];

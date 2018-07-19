@@ -6,11 +6,11 @@ import "./FinalizableCrowdsale.sol";
 import "./Tokens/ReleasableToken.sol";
 
 /**
- * @title RefundableCrowdsale
- * @dev Extension of Crowdsale contract add
- * the possibility of users getting a refund if goal is not met.
- * Uses a RefundVault as the crowdsale's vault.
- */
+  * @title RefundableCrowdsale
+  * @dev Extension of Crowdsale contract add
+  * the possibility of users getting a refund if goal is not met.
+  * Uses a RefundVault as the crowdsale's vault.
+  */
 contract RefundableCrowdsale is FinalizableCrowdsale {
   using SafeMath for uint256;
 
