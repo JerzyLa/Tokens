@@ -90,13 +90,6 @@ contract TimedStagesCrowdsale is ContractReceiver {
     investors.push(0x2835eBB9767B391c8b5e15Bbe4164E0a86d3d0B2);
     investors.push(0x3B2a085375193e9DfE004161eA3Ba0d282Aa0344);
     investors.push(0x1B88C415863e7CC830348d5BAAd13ea6730e45f1);
-
-    // update invested amount of wei
-    for(uint i = 0; i < investors.length; ++i) {
-      address investor = investors[i];
-      // TODO: fix this
-      // investedAmountOf[investor].add(PostDeliveryCrowdsale(oldCrowdsale).shares(investor));
-    }
   }
 
   // -----------------------------------------
@@ -135,18 +128,15 @@ contract TimedStagesCrowdsale is ContractReceiver {
     // assign tokens
     uint256 tokens = amountInWei.mul(stages[stageNumber].rate);
     _tokenPurchase(msg.sender, tokens);
-//    _postponedTokenPurchase(msg.sender, amountInWei);
     emit TokenPurchase(msg.sender, amountInWei, tokens);
 
-    // forward to wallet
+    // forward ether to wallet
     _forwardFunds();
   }
 
   function hasClosed() public view returns (bool) {
-    return (
-      block.timestamp > stages[stages.length-1].closingTime ||
-      token.balanceOf(this) == 0
-    );
+    return ( block.timestamp > stages[stages.length-1].closingTime ||
+      token.balanceOf(this) == 0 );
   }
 
   // -----------------------------------------

@@ -1,17 +1,17 @@
 pragma solidity ^0.4.21; 
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
-import "./utils/RefundVaultExt.sol"; 
-import "./FinalizableCrowdsale.sol"; 
-import "./tokens/ReleasableToken.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./../utils/RefundVaultExt.sol";
+import "./PrevFinalizableCrowdsale.sol";
+import "./../tokens/ReleasableToken.sol";
 
 /**
-  * @title RefundableCrowdsale
-  * @dev Extension of Crowdsale contract add
-  * the possibility of users getting a refund if goal is not met.
-  * Uses a RefundVault as the crowdsale's vault.
-  */
-contract RefundableCrowdsale is FinalizableCrowdsale {
+ * @title PrevRefundableCrowdsale
+ * @dev Extension of Crowdsale contract add
+ * the possibility of users getting a refund if goal is not met.
+ * Uses a RefundVault as the crowdsale's vault.
+ */
+contract PrevRefundableCrowdsale is PrevFinalizableCrowdsale {
   using SafeMath for uint256;
 
   // refund vault used to hold funds for refunding while crowdsale is running
@@ -21,7 +21,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     * @dev Constructor, creates RefundVault.
     */
   constructor() public {
-    vault = RefundableCrowdsale(oldCrowdsale).vault(); // TODO: check that
+    vault = new RefundVaultExt();
   }
 
   /**

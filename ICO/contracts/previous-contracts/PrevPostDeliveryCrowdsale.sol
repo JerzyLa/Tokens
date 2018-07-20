@@ -1,30 +1,23 @@
 pragma solidity ^0.4.21; 
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
-import "./TimedStagesCrowdsale.sol"; 
-import "./previous-contracts/PrevPostDeliveryCrowdsale.sol";
+import "./PrevTimedStagesCrowdsale.sol"; 
 
 /**
-  * @title PostDeliveryCrowdsale
-  * @dev Crowdsale that locks tokens from withdrawal until it ends.
-  */
-contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
+ * @title PrevPostDeliveryCrowdsale
+ * @dev Crowdsale that locks tokens from withdrawal until it ends.
+ */
+contract PrevPostDeliveryCrowdsale is PrevTimedStagesCrowdsale, Ownable {
   using SafeMath for uint256;
 
-  // bonus tokens available after crowdsale are withdrawned or not.
-  mapping(address => bool) public withdrawned;
+  mapping(address => uint256) public shares;
+
+  uint256 public totalShares;
   
-  // left tokens, which will be distributed after crowdsale
+  // all tokens which will be distributed among post delivery purchases
   uint256 public tokensForDistribution;
   
   bool once = true;
-
-  constructor() public {
-    for(uint i = 0; i < investors.length; ++i) {
-      address investor = investors[i];
-      investedAmountOf[investor].add(PrevPostDeliveryCrowdsale(oldCrowdsale).shares(investor));
-    }
-  }
 
   /**
     * @dev Withdraw tokens only after crowdsale ends.
@@ -43,15 +36,13 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
   function _withdrawTokens(address investor) internal {
     require(hasClosed());
     require(investor != address(0));
-    require(withdrawned[investor] == false, "Investor withdrew the funds previously");
-
-    withdrawned[investor] = true;
 
     // get tokens left after closing crowdsale
     getTokensForDistribution();
 
-    uint256 amount = tokensForDistribution.mul(investedAmountOf[investor]).div(collectedAmountInWei);
+    uint256 amount = tokensForDistribution.mul(shares[investor]).div(totalShares);
     require(amount != 0);
+    shares[investor] = 0;
     _tokenPurchase(investor, amount);
   }
 
@@ -61,5 +52,15 @@ contract PostDeliveryCrowdsale is TimedStagesCrowdsale, Ownable {
       tokensForDistribution = token.balanceOf(this);
     }
   }
-  
+
+  /**
+    * @dev Overrides parent by storing balances instead of issuing tokens right away.
+    * @param _beneficiary Token purchaser
+    * @param _amountInWei payed for tokens
+    */
+  function _postponedTokenPurchase(address _beneficiary, uint256 _amountInWei) internal {
+    shares[_beneficiary] = shares[_beneficiary].add(_amountInWei);
+    totalShares = totalShares.add(_amountInWei);
+  }
+
 }

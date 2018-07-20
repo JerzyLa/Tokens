@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "./Tokens/AMLToken.sol";
+import "./tokens/AMLToken.sol";
 
 contract MediarToken is AMLToken {
 

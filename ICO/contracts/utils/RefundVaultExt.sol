@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
-import "openzeppelin-solidity/contracts/crowdsale/distribution/utils/RefundVault.sol";
-
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract RefundVaultExt is Ownable
 {

@@ -7,7 +7,7 @@ import "../RefundableCrowdsale.sol";
 contract CustomCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
   constructor(
     address _wallet,
-    ReleasableToken _token,
+  //  ReleasableToken _token,
     uint256 _rate1,
     uint256 _minInvest1,
     uint256 _openingTime1, 
