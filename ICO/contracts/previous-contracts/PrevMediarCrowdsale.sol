@@ -3,7 +3,7 @@ pragma solidity ^0.4.21;
 import "./PrevRefundableCrowdsale.sol";
 import "./PrevPostDeliveryCrowdsale.sol";
 
-contract MediarCrowdsale is PrevPostDeliveryCrowdsale, PrevRefundableCrowdsale {
+contract PrevMediarCrowdsale is PrevPostDeliveryCrowdsale, PrevRefundableCrowdsale {
   using SafeMath for uint256;
 
   constructor(
