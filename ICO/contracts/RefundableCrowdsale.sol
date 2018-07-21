@@ -1,7 +1,6 @@
 pragma solidity ^0.4.21; 
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
-import "./utils/RefundVaultExt.sol"; 
 import "./FinalizableCrowdsale.sol"; 
 import "./tokens/ReleasableToken.sol";
 
@@ -14,14 +13,25 @@ import "./tokens/ReleasableToken.sol";
 contract RefundableCrowdsale is FinalizableCrowdsale {
   using SafeMath for uint256;
 
-  // refund vault used to hold funds for refunding while crowdsale is running
-  RefundVaultExt public vault;
+  enum State { Active, Refunding, Closed }
+
+  State public state;
+
+  // How much wei we have returned back to the contract after a failed crowdfund. 
+  uint256 public loadedRefund = 0;
+
+  // How much wei we have given back to investors.
+  uint public weiRefunded = 0;
+
+  event Closed();
+  event RefundsEnabled();
+  event Refunded(address indexed beneficiary, uint256 weiAmount);
 
   /**
     * @dev Constructor, creates RefundVault.
     */
   constructor() public {
-    vault = RefundableCrowdsale(oldCrowdsale).vault(); // TODO: check that
+    state = State.Active;
   }
 
   /**
@@ -29,8 +39,8 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     */
   function claimRefund() public {
     require(isFinalized);
-
-    vault.refund(msg.sender);
+    require(state == State.Refunding);
+    refund(msg.sender);
   }
 
   /**
@@ -39,8 +49,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     */
   function claimRefundForInvestor(address investor) public onlyOwner {
     require(investor != address(0));
-
-    vault.refundAsOwner(investor);
+    refund(msg.sender);
   }
 
   /**
@@ -49,10 +58,10 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     */
   function finalization(bool isSuccessful) internal {
     if (isSuccessful) {
-      vault.close();
+      close();
       ReleasableToken(token).releaseTokenTransfer();
     } else {
-      vault.enableRefunds();
+      enableRefunds();
     }
 
     super.finalization(isSuccessful);
@@ -64,7 +73,8 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached..
     */
   function loadRefund() public payable {
-    vault.loadRefund.value(msg.value)();
+    require(msg.value != 0);
+    loadedRefund = loadedRefund.add(msg.value);
   }
 
   /**
@@ -72,7 +82,31 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     * Stores info about investor deposit.
   */
   function _forwardFunds() internal {
-    vault.deposit(msg.sender, msg.value);
-    wallet.transfer(msg.value);
+    require(state == State.Active);
+    super._forwardFunds();
+  }
+
+  function close() onlyOwner internal {
+    require(state == State.Active);
+    state = State.Closed;
+    emit Closed();
+  }
+
+  function enableRefunds() onlyOwner internal {
+    require(state == State.Active);
+    state = State.Refunding;
+    emit RefundsEnabled();
+  }
+
+  /**
+    * @param investor Investor address
+    */
+  function refund(address investor) internal {
+    uint256 depositedValue = investedAmountOf[investor];
+    require(depositedValue != 0);
+    investedAmountOf[investor] = 0;
+    weiRefunded = weiRefunded.add(depositedValue);
+    investor.transfer(depositedValue);
+    emit Refunded(investor, depositedValue);
   }
 }

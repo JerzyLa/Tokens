@@ -13,10 +13,7 @@ contract PrevMediarCrowdsale is PrevPostDeliveryCrowdsale, PrevRefundableCrowdsa
     public
     PrevTimedStagesCrowdsale(_wallet, _token)
   {
-    stages.push(Stage(4000, 500 finney, 1527811200, 1529020800));
-    stages.push(Stage(3000, 200 finney, 1529107200, 1531699200));
-    stages.push(Stage(2500, 200 finney, 1533254400, 1534723200));
-    stages.push(Stage(2000, 200 finney, 1535673600, 1537142400));
-    stages.push(Stage(0, 200 finney, 1539561600, 1540166400));
+    stages.push(Stage(2500, 200 finney, 1532131200, 1532217600));
+    stages.push(Stage(2000, 200 finney, 1532217601, 1532304000));
   }
 }

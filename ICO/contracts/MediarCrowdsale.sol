@@ -18,7 +18,7 @@ import "./PostDeliveryCrowdsale.sol";
 //      5. Refunding when goal not reached.
 //      6. AML token support.
 // ----------------------------------------------------------------------------
-contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
+contract MediarCrowdsale is PostDeliveryCrowdsale {
   using SafeMath for uint256;
 
   constructor(
@@ -27,9 +27,13 @@ contract MediarCrowdsale is PostDeliveryCrowdsale, RefundableCrowdsale {
     public
     TimedStagesCrowdsale(oldCrowdsale)
   {
-    stages.push(Stage(3000, 200 finney, 1533254400, 1536364799));
-    stages.push(Stage(2500, 200 finney, 1536883200, 1538783999));
-    stages.push(Stage(2000, 200 finney, 1539302400, 1541203199));
-    stages.push(Stage(0, 200 finney, 1541807999, 1543622399));
+    // stages.push(Stage(3000, 200 finney, 1533254400, 1536364799));
+    // stages.push(Stage(2500, 200 finney, 1536883200, 1538783999));
+    // stages.push(Stage(2000, 200 finney, 1539302400, 1541203199));
+    // stages.push(Stage(0, 200 finney, 1541807999, 1543622399));
+
+    stages.push(Stage(2500, 200 finney, 1532131200, 1532217600));
+    stages.push(Stage(2000, 200 finney, 1532217601, 1532304000));
+    stages.push(Stage(0, 200 finney, 1532304001, 1532390400));
   }
 }

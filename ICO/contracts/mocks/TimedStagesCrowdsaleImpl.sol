@@ -6,7 +6,7 @@ import "../TimedStagesCrowdsale.sol";
 contract TimedStagesCrowdsaleImpl is TimedStagesCrowdsale {
   constructor(
     address _wallet,
-    ERC223  _token,
+ //   ERC223  _token,
     uint256 _rate1,
     uint256 _minInvest1,
     uint256 _openingTime1, 

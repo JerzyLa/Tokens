@@ -1,10 +1,8 @@
 pragma solidity ^0.4.21;
 
 import "../PostDeliveryCrowdsale.sol";
-import "../RefundableCrowdsale.sol";
 
-
-contract CustomCrowdsaleImpl is PostDeliveryCrowdsale, RefundableCrowdsale {
+contract CustomCrowdsaleImpl is PostDeliveryCrowdsale {
   constructor(
     address _wallet,
   //  ReleasableToken _token,

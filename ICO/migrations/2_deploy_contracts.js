@@ -1,5 +1,5 @@
  var MediarToken = artifacts.require("./MediarToken.sol");
- var MediarCrowdsale = artifacts.require("./MediarCrowdsale.sol");
+ var MediarCrowdsale = artifacts.require("./PrevMediarCrowdsale.sol");
 
 module.exports = function(deployer, network, accounts) {
    let token;
