@@ -49,7 +49,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
     */
   function claimRefundForInvestor(address investor) public onlyOwner {
     require(investor != address(0));
-    refund(msg.sender);
+    refund(investor);
   }
 
   /**
