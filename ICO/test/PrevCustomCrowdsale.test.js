@@ -11,10 +11,10 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-const CustomCrowdsaleImpl = artifacts.require('CustomCrowdsaleImpl');
+const PrevCustomCrowdsaleImpl = artifacts.require('PrevCustomCrowdsaleImpl');
 const MediarToken = artifacts.require('MediarToken');
 
-contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
+contract('PrevCustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
   const rate1 = new BigNumber(100000000);
   const value = ether(1);
   const minInvest1 = new BigNumber('5e17');
@@ -35,7 +35,7 @@ contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investo
     this.afterClosingTime = this.closingTimeLast + duration.seconds(1);
     
     this.token = await MediarToken.new({ from: owner });
-    this.crowdsale = await CustomCrowdsaleImpl.new(wallet, this.token.address,
+    this.crowdsale = await PrevCustomCrowdsaleImpl.new(wallet, this.token.address,
       rate1, minInvest1, this.openingTime1, this.closingTime1,
       minInvest2, this.openingTimeLast, this.closingTimeLast,
       { from: owner }

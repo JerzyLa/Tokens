@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./Receiver_Interface.sol";
 import "./ERC223_Interface.sol";

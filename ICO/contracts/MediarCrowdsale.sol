@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./RefundableCrowdsale.sol";
 import "./PostDeliveryCrowdsale.sol";
@@ -32,8 +32,6 @@ contract MediarCrowdsale is PostDeliveryCrowdsale {
     // stages.push(Stage(2000, 200 finney, 1539302400, 1541203199));
     // stages.push(Stage(0, 200 finney, 1541807999, 1543622399));
 
-    stages.push(Stage(2500, 200 finney, 1532131200, 1532217600));
-    stages.push(Stage(2000, 200 finney, 1532217601, 1532304000));
-    stages.push(Stage(0, 200 finney, 1532304001, 1532390400));
+    stages.push(Stage(2000, 200 finney, 1532217601, 1532359680));
   }
 }

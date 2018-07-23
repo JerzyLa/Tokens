@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -90,8 +90,10 @@ contract TimedStagesCrowdsale is ContractReceiver {
     // investors.push(0x2835eBB9767B391c8b5e15Bbe4164E0a86d3d0B2);
     // investors.push(0x3B2a085375193e9DfE004161eA3Ba0d282Aa0344);
     // investors.push(0x1B88C415863e7CC830348d5BAAd13ea6730e45f1);
-    investors.push(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB);
-    investors.push(0x583031D1113aD414F02576BD6afaBfb302140225);
+    
+    // only for tests
+    // investors.push(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB);
+    // investors.push(0x583031D1113aD414F02576BD6afaBfb302140225);
   }
 
   // -----------------------------------------

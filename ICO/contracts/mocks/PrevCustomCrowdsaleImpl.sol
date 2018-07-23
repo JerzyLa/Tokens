@@ -1,11 +1,12 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
-import "../PostDeliveryCrowdsale.sol";
+import "../previous-contracts/PrevPostDeliveryCrowdsale.sol";
+import "../previous-contracts/PrevRefundableCrowdsale.sol";
 
-contract CustomCrowdsaleImpl is PostDeliveryCrowdsale {
+contract PrevCustomCrowdsaleImpl is PrevPostDeliveryCrowdsale, PrevRefundableCrowdsale {
   constructor(
     address _wallet,
-  //  ReleasableToken _token,
+    ReleasableToken _token,
     uint256 _rate1,
     uint256 _minInvest1,
     uint256 _openingTime1, 
@@ -15,7 +16,7 @@ contract CustomCrowdsaleImpl is PostDeliveryCrowdsale {
     uint256 _closingTime2
   )
     public
-    TimedStagesCrowdsale(_wallet)
+    PrevTimedStagesCrowdsale(_wallet, _token)
   {
     stages.push(Stage(_rate1, _minInvest1, _openingTime1, _closingTime1));
     stages.push(Stage(0, _minInvest2, _openingTime2, _closingTime2));
