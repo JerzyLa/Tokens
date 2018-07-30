@@ -1,6 +1,6 @@
 import ether from './helpers/ether';
 import { advanceBlock } from './helpers/advanceToBlock';
-import { increaseTimeTo, duration } from './helpers/increaseTime';
+import increaseTime, { increaseTimeTo, duration } from './helpers/increaseTime';
 import latestTime from './helpers/latestTime';
 import EVMRevert from './helpers/EVMRevert';
 
@@ -121,6 +121,15 @@ contract('TimedStagesCrowdsaleImpl', function ([_, owner, investor, wallet]) {
       await this.crowdsale.buyTokens({ value, from: investor });
       const post = web3.eth.getBalance(wallet);
       post.minus(pre).should.be.bignumber.equal(value);
+    });
+
+    it('should store investor and invested amount', async function () {
+      await increaseTimeTo(this.openingTime);
+      await this.crowdsale.buyTokens({ value, from: investor });
+      const invesor1 = await this.crowdsale.investors(0);
+      invesor1.should.be.equal(investor);
+      const investedAmount = await this.crowdsale.investedAmountOf(investor);
+      investedAmount.should.be.bignumber.equal(value);
     });
   });
 });

@@ -11,10 +11,10 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-const PrevCustomCrowdsaleImpl = artifacts.require('PrevCustomCrowdsaleImpl');
+const CustomCrowdsaleImpl = artifacts.require('CustomCrowdsaleImpl');
 const MediarToken = artifacts.require('MediarToken');
 
-contract('PrevCustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
+contract('CustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, investor, investor1, investor2, investor3]) {
   const rate1 = new BigNumber(100000000);
   const value = ether(1);
   const minInvest1 = new BigNumber('5e17');
@@ -35,7 +35,7 @@ contract('PrevCustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, inv
     this.afterClosingTime = this.closingTimeLast + duration.seconds(1);
     
     this.token = await MediarToken.new({ from: owner });
-    this.crowdsale = await PrevCustomCrowdsaleImpl.new(wallet, this.token.address,
+    this.crowdsale = await CustomCrowdsaleImpl.new(wallet, this.token.address,
       rate1, minInvest1, this.openingTime1, this.closingTime1,
       minInvest2, this.openingTimeLast, this.closingTimeLast,
       { from: owner }
@@ -98,26 +98,26 @@ contract('PrevCustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, inv
       await this.crowdsale.withdrawTokens({ from: investor }).should.be.rejectedWith(EVMRevert);
     });
 
-    it('should allow beneficiaries to withdraw tokens after crowdsale ends', async function () {
+    it('should allow beneficiaries to withdraw tokens after successful finalization', async function () {
       await increaseTimeTo(this.openingTimeLast);
       await this.crowdsale.buyTokens({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.finalize(true, { from: owner });
       await this.crowdsale.withdrawTokens({ from: investor }).should.be.fulfilled;
     });
 
-    it('should allow to withdraw tokens after last stage', async function () {
+    it('should not allow to withdraw tokens after last stage before finalization', async function () {
       await increaseTimeTo(this.openingTimeLast);
       await this.crowdsale.buyTokens({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
-      await this.crowdsale.withdrawTokens({ from: investor });
-      const balance = await this.token.balanceOf(investor);
-      balance.should.be.bignumber.equal(tokenSupply);
+      await this.crowdsale.withdrawTokens({ from: investor }).should.be.rejectedWith(EVMRevert);     
     });
 
-    it('should allow owner to withdraw tokens for investor after last stage', async function () {
+    it('should allow owner to withdraw tokens for investor after successful finalization', async function () {
       await increaseTimeTo(this.openingTimeLast);
       await this.crowdsale.buyTokens({ value: value, from: investor });
       await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.finalize(true, { from: owner });
       await this.crowdsale.withdrawTokensForInvestor(investor, { from: owner });
       const balance = await this.token.balanceOf(investor);
       balance.should.be.bignumber.equal(tokenSupply);
@@ -131,6 +131,7 @@ contract('PrevCustomCrowdsaleImpl', function ([_, owner, wallet, thirdparty, inv
       await this.crowdsale.buyTokens({ value: value.mul(2), from: investor2 });
       await this.crowdsale.buyTokens({ value: value.mul(3), from: investor3 });
       await increaseTimeTo(this.afterClosingTime);
+      await this.crowdsale.finalize(true, { from: owner });
       
       await this.crowdsale.withdrawTokens({ from: investor1 });
       let balance = await this.token.balanceOf(investor1);
