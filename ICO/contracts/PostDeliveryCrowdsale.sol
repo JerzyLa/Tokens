@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol"; 
 import "./RefundableCrowdsale.sol"; 
-import "./previous-contracts/PrevPostDeliveryCrowdsale.sol";
 
 /**
   * @title PostDeliveryCrowdsale
@@ -16,13 +15,6 @@ contract PostDeliveryCrowdsale is RefundableCrowdsale {
   
   // left tokens, which will be distributed after crowdsale
   uint256 public tokensForDistribution = 0;
-
-  constructor() public {
-    for(uint i = 0; i < investors.length; ++i) {
-      address investor = investors[i];
-      investedAmountOf[investor] = PrevPostDeliveryCrowdsale(oldCrowdsale).shares(investor);
-    }
-  }
 
   /**
     * @dev Withdraw tokens only after crowdsale ends.
@@ -44,14 +36,14 @@ contract PostDeliveryCrowdsale is RefundableCrowdsale {
     require(withdrawned[investor] == false, "Investor withdrew the funds previously");
     
     withdrawned[investor] = true;
-    uint256 amount = tokensForDistribution.mul(investedAmountOf[investor]).div(collectedAmountInWei-weiRefunded);
+    uint256 amount = tokensForDistribution.mul(investedAmountOf[investor]).div(collectedAmountInWei - weiRefunded);
     require(amount != 0);
     _tokenPurchase(investor, amount);
   }
 
   /**
-    * @dev vault finalization task, called when owner calls finalize()
-    * when successful release token and disable refunding.
+    * @dev finalization task, called when owner calls finalize()
+    * when successful calculate tokens for distribution.
     */
   function finalization(bool isSuccessful) internal {
     if (isSuccessful) {

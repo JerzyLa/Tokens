@@ -28,7 +28,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
   event Refunded(address indexed beneficiary, uint256 weiAmount);
 
   /**
-    * @dev Constructor, creates RefundVault.
+    * @dev Constructor, set crowdsale to active.
     */
   constructor() public {
     state = State.Active;
