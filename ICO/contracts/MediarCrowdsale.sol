@@ -37,7 +37,7 @@ contract MediarCrowdsale is PostDeliveryCrowdsale {
     stages.push(Stage(3000, 200 finney, 1533254400, 1536364799));
     stages.push(Stage(2500, 200 finney, 1536883200, 1538783999));
     stages.push(Stage(2000, 200 finney, 1539302400, 1541203199));
-    stages.push(Stage(0, 200 finney, 1541807999, 1543622399));
+    stages.push(Stage(0, 200 finney, 1541721600, 1543622399));
 
     // fill investors which already took part in crowdsale
     investors.push(0x5CF41F92dBe726Bb5Addc09baD6e8F1c69CC3E2f);
