@@ -33,6 +33,9 @@ contract Crowdsale is ContractReceiver {
   // 1 wei will give you 1 unit, or 0.001 TOK.
   uint256 public rate;
 
+  // Minimum invested amount
+  uint256 public minInvest;
+
   // Amount of wei raised
   uint256 public weiRaised;
 
@@ -58,10 +61,11 @@ contract Crowdsale is ContractReceiver {
 
   /**
    * @param _rate Number of token units a buyer gets per wei
+   * @param _minInvest minimum invest amount
    * @param _wallet Address where collected funds will be forwarded to
    * @param _token Address of the token being sold
    */
-  constructor(uint256 _rate, address _wallet, ReleasableToken _token) public {
+  constructor(uint256 _rate, uint256 _minInvest, address _wallet, ReleasableToken _token) public {
     require(_rate > 0);
     require(_wallet != address(0));
     require(_token != address(0));
@@ -69,6 +73,7 @@ contract Crowdsale is ContractReceiver {
     rate = _rate;
     wallet = _wallet;
     token = _token;
+    minInvest = _minInvest;
   }
 
   /*
@@ -146,6 +151,7 @@ contract Crowdsale is ContractReceiver {
   {
     require(_beneficiary != address(0));
     require(_weiAmount != 0);
+    require(_weiAmount >= minInvest);
   }
 
   /**

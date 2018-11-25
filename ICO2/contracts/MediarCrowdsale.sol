@@ -10,11 +10,12 @@ contract MediarCrowdsale is TimedCrowdsale {
     uint256 openingTime,
     uint256 closingTime,
     uint256 rate,
+    uint256 minInvest,
     address wallet,
     ReleasableToken token
   )
     public
-    Crowdsale(rate, wallet, token)
+    Crowdsale(rate, minInvest, wallet, token)
     TimedCrowdsale(openingTime, closingTime)
   {
   }
